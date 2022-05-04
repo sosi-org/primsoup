@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 '''
 actn: Simple Action Minimizer
 
@@ -10,7 +13,7 @@ for given start and end points.
 
 It uses random local search (some local Monte Carlo) in space of trajectories.
 It is not an efficient algorithm.
-It uses a crude and naïve/rudimentary/primitive representation of functionals.
+It uses a crude and naiive/rudimentary/primitive representation of functionals.
 '''
 
 
