@@ -101,8 +101,8 @@ for i in range(0,100000/2):
 
 	ctr+=1
 	if ctr%500 ==0:
-		print p.get_action()
-	#print p.get_action()
+		print( p.get_action() )
+	#print( p.get_action() )
 
 DT=0.01
 pl.plot(p.xy[0,:],p.xy[1,:], 'k')
