@@ -24,9 +24,9 @@ import matplotlib.pylab as pl
 _KG, _Gr = 1.0, 0.001
 _CM = 0.01
 
-# todo: xdim, ydim
-target_x_meters = 15.0 #* 2 #* 100.0 #    * 5.0 # *100
-target_y_meters = 1.0 #* 30
+#target_x_meters = 15.0 #* 2 #* 100.0 #    * 5.0 # *100
+#target_y_meters = 1.0 #* 30
+target_xy_meters = np.array([15.0, 1.0])
 target_t_sec = 0.1  # 100 msec?!
 ntimesteps = 10*2
 #ntimesteps = 20  # todo: not stable / converging to the same value when ntimesteps (discritisation segments of timespace trajectory) is increased
@@ -40,18 +40,17 @@ ntimesteps = 10*2
 # Should reach y=100
 
 class World:
-    g = 9.8 * 10000.0
+    g = 9.8 * 1000.0
 
 class Trajectory:
-    def __init__(self, trajc=None):
+    def __init__(self, trajc=None, initial_path_xy=None):
         if not trajc is None:
             self.xy = trajc.xy.copy()
+            (self.m, self.dt) = (trajc.m, trajc.dt)
         else:
-            # initial path
-            self.xy = np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=S_DIM) * np.array([target_x_meters,target_y_meters])[:,None]
-
-        self.m = 1.0 * _KG
-        self.dt= target_t_sec / float(ntimesteps)
+            self.xy = initial_path_xy.copy()
+            self.m = 1.0 * _KG
+            self.dt= target_t_sec / float(ntimesteps)
 
     def get_pot(self):
         h = self.xy[Y_AXIS,:]
@@ -87,18 +86,21 @@ def mutate(old_traj):
     ##############
     # Mutation
     ##############
-    PERTURB = 0.1
+    PERTURB = np.array([0.1,0.1/10.0*2])
     # Normal(0,σ)
-    dxy = (np.random.rand(2)*2-1.0)*PERTURB
+    uxy = (np.random.rand(2)*2-1.0)
     # uniform [-1,1] * σ
-    #dxy = (np.random.randn(2))*PERTURB
-    cand.xy[:,j] = cand.xy[:,j] + dxy
+    #uxy = (np.random.randn(2))
+    cand.xy[:,j] = cand.xy[:,j] + uxy * PERTURB[:]
     # todo: visualise (K,T), subtract (K'-K, T'-T)
 
     return cand
 
-def accept_mutation(cand, old_traj):
-    return
+#def accept_mutation(cand, old_traj):
+#    return
+
+def rand_path(ntimesteps):
+    return np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=S_DIM)
 
 # hyper/meta trajectory
 hyper_traj = []
@@ -109,10 +111,10 @@ PER_HOW_MANY = 50*10
 seqoa=[]
 seqoa_i=[]
 accepted_count = 0
-currentTraj = Trajectory()
+currentTraj = Trajectory(initial_path_xy=rand_path(ntimesteps) * target_xy_meters[:,None])
 # clamp end points
 currentTraj.xy[:,0] = (0.0, 0.0)
-currentTraj.xy[:,-1] = (target_x_meters, target_y_meters)
+currentTraj.xy[:,-1] = target_xy_meters
 
 MAX_COUNT = int(100000/2 * 1.4  * 10/10*3)
 # MAX_COUNT =10000 # more brief, for debug
