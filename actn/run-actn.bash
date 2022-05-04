@@ -3,6 +3,8 @@
 set -xu
 
 function chk_virtualenv(){
+    # a solution based on `virutalenv`
+
     #set -ex
     if [[  -d ./p2-for-me ]]
     then
@@ -24,12 +26,13 @@ function chk_virtualenv(){
 }
 
 function chk_venv(){
+    # a solution based on `venv` as opposed to `virutalenv`
+
     #set -ex
     if [[  -d ./p3-for-me ]]
     then
-    # exists
-    #return 0
-    echo
+    echo "venv exists"
+    return 0
     fi
 
     echo "INSTALLING THEM"
@@ -43,13 +46,20 @@ function chk_venv(){
     python --version
     # Python 3.9.12
 
-    #  --trusted-host pypi.python.org
     #pip install numpy
     #pip install matplotlib
 
-    # python -m pip install --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host pypi.python.org [--proxy ...] [--user] <packagename>
-    #python -m pip install --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host pypi.python.org --user \
-    #    numpy
+    # python -m pip install \
+    #    --trusted-host files.pythonhosted.org \
+    #    --trusted-host pypi.org \
+    #    --trusted-host pypi.python.org \
+    #    [--proxy ...] [--user] <packagename>
+    #
+    #python -m pip install
+    #   --trusted-host files.pythonhosted.org \
+    #   --trusted-host pypi.org \
+    #   --trusted-host pypi.python.org --user \
+    #      numpy
 
 
     # For trusted sources: see  https://stackoverflow.com/questions/49324802/pip-always-fails-ssl-verification
@@ -79,5 +89,7 @@ chk_venv
 
 echo "Main script"
 source ./p3-for-me/bin/activate
+
+python --version
 
 python action1.py
