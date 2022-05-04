@@ -114,6 +114,7 @@ PER_HOW_MANY = 50*10
 slowda=0
 seqa=[]
 seqoa=[]
+seqoa_i=[]
 accepted_count = 0
 p=Trajectory()
 # clamp end points
@@ -167,10 +168,21 @@ for i in range(0,MAX_COUNT):
     slowda = slowda * (1.0-alpha) + action_new * (alpha)
     seqa.append(slowda)
     seqoa.append(action_new)
+    seqoa_i.append(i)
 
     accepted_count += 1
     if accepted_count % PER_HOW_MANY ==0:
         print( p.get_action() )
+
+def filter1(a, alpha):
+    a=np.array(a); print(a.shape)
+    assert len(a.shape) == 1
+    b = a.copy()
+    slowa = a[0]
+    for i in range(1, b.shape[0]):
+        slowa = slowa * (1.0-alpha) + a[i] * (alpha)
+        b[i] = slowa
+    return b
 
 ############
 # Plot overall indicators of trajectory of learning
@@ -189,7 +201,10 @@ ax1.plot(p.xy[X_AXIS,:],p.xy[Y_AXIS,:], 'k')
 ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
 
 ax2.plot(ta,np.array(seqoa),'r', label='A')
-ax2.plot(ta[1:],np.diff(seqa)/DT*1000, '', label='dA')  # dx/dt
+ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000,'k.', label='ΔA')
+ax2.plot(ta[1:],np.diff(seqa)/DT*1000, 'k', label='dA1')  # dx/dt
+ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/DT*1000 + 0.04    , 'b', label='dA2')  # dx/dt
+
 #ax2.plot(ta,np.array(seqa)*0.0,'k')
 ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
 
