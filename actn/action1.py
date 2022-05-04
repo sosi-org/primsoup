@@ -68,6 +68,13 @@ class Trajectory:
 	def get_action(self):
 		return self.get_kin() - self.get_pot()
 
+def mutate(old_traj):
+
+	return cand
+
+def accept_mutation(cand, old_traj):
+	return
+
 # hyper/meta trajectory
 hyper_traj = []
 
@@ -115,14 +122,19 @@ for i in range(0,MAX_COUNT):
 	assert j < ntimesteps
 	# Don't mutate clamped positions:
 	if j == 0:
+		#return None
 		continue
 	if j == cand.xy.shape[1]-1:
+		#return None
 		continue
+
+	#if cand == None:
+	#	continue
 
 	##############
 	# Mutation
 	##############
-	PERTURB = 0.001*100 * 0.5
+	PERTURB = 0.1
 	# Normal(0,σ)
 	dxy = (np.random.rand(2)*2-1.0)*PERTURB
 	# uniform [-1,1] * σ
@@ -130,6 +142,9 @@ for i in range(0,MAX_COUNT):
 	cand.xy[:,j] = cand.xy[:,j] + dxy
 	#print p.get_pot(), p.get_kin()
 	#print p.get_pot() - cand.get_pot(), p.get_kin() - cand.get_kin()
+
+	# Acceptance criteria
+
 	a=cand.get_action()
 	da= a - p.get_action()
 	#print da
@@ -139,6 +154,8 @@ for i in range(0,MAX_COUNT):
 	#probr = math.exp( -abs(da)/Temp )
 	#print probr
 	#seqa.append(a)
+
+	# accept the mutation
 	p = cand
 
 	alpha=0.01
