@@ -1,3 +1,18 @@
+'''
+actn: Simple Action Minimizer
+
+Based on the concept of "Action" defined on "trajectories".
+Action and Lagragian are concepts defined by Joseph-Louis Lagrange
+that are able to describe the whole classical mechanics.
+
+This script finds a tajectory that minimises the Lagrange-ian Action,
+for given start and end points.
+
+It uses random local search (some local Monte Carlo) in space of trajectories.
+IT is not an efficient algorithm, also uses a crude and naïve/rudimentary/primitive representation of functionals.
+'''
+
+
 import numpy as np
 import math
 import matplotlib.pylab as pl
