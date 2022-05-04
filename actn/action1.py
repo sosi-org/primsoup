@@ -111,7 +111,6 @@ hyper_traj = []
 #PER_HOW_MANY = 500
 PER_HOW_MANY = 50*10
 
-slowda=0.011
 seqoa=[]
 seqoa_i=[]
 accepted_count = 0
@@ -163,9 +162,6 @@ for i in range(0,MAX_COUNT):
     p = cand
 
     alpha=0.01
-    if slowda == 0.011:
-      slowda = action_new
-    slowda = slowda * (1.0-alpha) + action_new * (alpha)
     seqoa.append(action_new)
     seqoa_i.append(i)
 
