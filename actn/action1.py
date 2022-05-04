@@ -194,7 +194,7 @@ def filter1(a, alpha):
 # ta: not the real time, not the s: the learning time! τ
 # x-axis = Abscissa = slow time: τ
 # # not physical time
-ta=np.arange(0.0,float(len(seqa)))/float(len(seqa))
+ta=np.arange(0.0,float(len(seqoa)))/float(len(seqoa))
 
 fig, (ax1, ax2) = pl.subplots(1, 2)
 # 0.01
@@ -204,7 +204,7 @@ ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
 
 ax2.plot(ta,np.array(seqoa),'r', label='A')
 ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000,'k.', label='ΔA')
-ax2.plot(ta[1:],np.diff(seqa)/DT*1000, 'm', label='dA1')  # dx/dt
+#ax2.plot(ta[1:],np.diff(seqa)/DT*1000, 'm', label='dA1')  # dx/dt
 ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/DT*1000 + 0.04    , 'b', label='dA2')  # dx/dt
 
 #ax2.plot(ta,np.array(seqa)*0.0,'k')
