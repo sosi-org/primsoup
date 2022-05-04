@@ -121,7 +121,7 @@ p.xy[:,0]=(0.0,0.0)
 p.xy[:,-1]=(target_x_meters,target_y_meters)
 #pl.plot(p.xy[0,:],p.xy[1,:], 'b')
 
-MAX_COUNT = int(100000/2 * 1.4  * 10/10)
+MAX_COUNT = int(100000/2 * 1.4  * 10/10/5)
 # MAX_COUNT =10000 # more brief, for debug
 
 for i in range(0,MAX_COUNT):
@@ -172,23 +172,26 @@ for i in range(0,MAX_COUNT):
     if accepted_count % PER_HOW_MANY ==0:
         print( p.get_action() )
 
+############
 # Plot overall indicators of trajectory of learning
+############
 
-pl.figure()
 # What is this figure showing?
 # ta: not the real time, not the s: the learning time! τ
 # x-axis = Abscissa = slow time: τ
 # # not physical time
 ta=np.arange(0.0,float(len(seqa)))/float(len(seqa))
 
-#fig, (ax1, ax2) = plt.subplots(1, 2)
+fig, (ax1, ax2) = pl.subplots(1, 2)
 # 0.01
 DT=1.0 # not physical time
-pl.plot(p.xy[X_AXIS,:],p.xy[Y_AXIS,:], 'k')
+ax1.plot(p.xy[X_AXIS,:],p.xy[Y_AXIS,:], 'k')
+ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
 
-pl.plot(ta,np.array(seqoa),'r')
-pl.plot(ta[1:],np.diff(seqa)/DT)  # dx/dt
-pl.plot(ta,np.array(seqa)*0.0,'k')
+ax2.plot(ta,np.array(seqoa),'r', label='A')
+ax2.plot(ta[1:],np.diff(seqa)/DT*1000, '', label='dA')  # dx/dt
+#ax2.plot(ta,np.array(seqa)*0.0,'k')
+ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
 
 # Plot certain streaks in the overall trajectory of learning
 xyz = np.concatenate(hyper_traj,axis=0)
@@ -199,6 +202,7 @@ for ii in [3,5]: # out of ntimesteps
     pl.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
     pl.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.2)
     pl.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.-')
+    pl.gca().set(xlabel='x', ylabel='y')
 
-print('Finished. Close the plot.')
+print('Finished. Close the plot. Press Q')
 pl.show()
