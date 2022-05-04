@@ -64,8 +64,13 @@ p.xy[:,0]=(0,0)
 p.xy[:,-1]=(5,1)
 #pl.plot(p.xy[0,:],p.xy[1,:], 'b')
 for i in range(0,int(100000/2)):
-	if i %500 ==0:
+	if i % 500 ==0:
 		pl.plot(p.xy[0,:],p.xy[1,:], 'b') #, 'color',(0.3,0.3,0.3) )
+		print(i)
+		#pl.draw()
+		pl.pause(0.001)
+		print( p.get_action() )
+		pl.show(block=False)
 	cand = Path(p)
 	#print p.get_pot()
 	#print p.get_kin()
@@ -100,7 +105,7 @@ for i in range(0,int(100000/2)):
 	seqoa.append(a)
 
 	ctr+=1
-	if ctr%500 ==0:
+	if ctr % 500 ==0:
 		print( p.get_action() )
 	#print( p.get_action() )
 
