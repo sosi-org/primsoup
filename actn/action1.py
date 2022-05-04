@@ -33,8 +33,10 @@ ntimesteps = 10
 #ntimesteps = 10+15 # segments of trajectory (nsteps = nsegments of time)
 # = p.xy.shape[1]
 
-X_AXIS = 0
-Y_AXIS = 1
+(X_AXIS, Y_AXIS) = (0, 1)
+(XY_DIM, S_DIM) = (0, 1)
+# x(s), y(s), t(s)
+
 # Should reach y=100
 
 class Path:
@@ -47,7 +49,7 @@ class Path:
 		else:
 			#self.xy = np.zeros((2,ntimesteps))
 			# initial path
-			self.xy = np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=1) * np.array([target_x_meters,target_y_meters])[:,None]
+			self.xy = np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=S_DIM) * np.array([target_x_meters,target_y_meters])[:,None]
 			print(self.xy)
 
 		#self.A=np.zeros((2,))
@@ -60,15 +62,17 @@ class Path:
 
 	def piecewise(self):
 		#np.diff(self.xy[0,:])
-		return np.diff(self.xy, axis=1)
+		return np.diff(self.xy, axis=S_DIM)
 
 	def get_pot(self):
-		return np.sum(self.g * self.m  * self.xy[Y_AXIS,:]) * self.dt
+		h = self.xy[Y_AXIS,:]
+		mgh = self.g * self.m  * h
+		return np.sum(mgh) * self.dt  # integrate
 
 	def get_kin(self):
 		v = self.piecewise() / self.dt
-		xy=np.sum(0.5 * self.m * v * v, axis=0)
-		return np.sum(xy) * self.dt #x+y
+		mv2 = np.sum(0.5 * self.m * v * v, axis=XY_DIM)
+		return np.sum(mv2) * self.dt  # integrate
 
 	def get_action(self):
 		return self.get_kin() - self.get_pot()
@@ -109,7 +113,7 @@ for i in range(0,MAX_COUNT):
 	cand = Path(p)
 	#print p.get_pot()
 	#print p.get_kin()
-	j = int(np.random.rand()*p.xy.shape[1])
+	j = int(np.random.rand()*p.xy.shape[S_DIM])
 	#print j
 	assert j>=0
 	assert j<ntimesteps
