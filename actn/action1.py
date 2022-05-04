@@ -21,12 +21,14 @@ import numpy as np
 import math
 import matplotlib.pylab as pl
 
+# todo: xdim, ydim
 xlen = 5.0 #* 2 #* 100.0 #	* 5.0 # *100
 ylen = 1.0 #* 30
-#xcount = 10
-#xcount = 20  # todo: not stable / converging to the same value when xcount (discritisation segments) is increased
-xcount = 10
+#ntimesteps = 10
+#ntimesteps = 20  # todo: not stable / converging to the same value when ntimesteps (discritisation segments of timespace trajectory) is increased
+ntimesteps = 10+15 # segments of trajectory (nsteps = nsegments of time)
 
+# Should reach y=100
 
 class Path:
 	g = 9.8
@@ -36,16 +38,17 @@ class Path:
 		if not pth is None:
 			self.xy =pth.xy.copy()
 		else:
-			#self.xy = np.zeros((2,xcount))
+			#self.xy = np.zeros((2,ntimesteps))
 			# initial path
-			self.xy = np.cumsum(np.random.rand(2,xcount)/(float(xcount)/2), axis=1) * np.array([xlen,ylen])[:,None]
+			self.xy = np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=1) * np.array([xlen,ylen])[:,None]
 			print(self.xy)
 
 		#self.A=np.zeros((2,))
 		#self.B=np.zeros((2,))
-		self.m=1
+		self.m = 1.0
+		#self.m_segm = self._m / float(ntimesteps) # mass per segment
 		#self.t = ?
-		self.dt= 0.01
+		self.dt= 0.01 * 10.0 / float(ntimesteps)
 
 
 	def piecewise(self):
@@ -101,7 +104,7 @@ for i in range(0,MAX_COUNT):
 	j = int(np.random.rand()*p.xy.shape[1])
 	#print j
 	assert j>=0
-	assert j<xcount
+	assert j<ntimesteps
 	if j==0:
 		continue
 	if j==cand.xy.shape[1]-1:
@@ -111,7 +114,10 @@ for i in range(0,MAX_COUNT):
 	# Mutation
 	##############
 	PERTURB = 0.001*100 * 0.5
-	dxy = (np.random.randn(2))*PERTURB
+	# Normal(0,σ)
+	dxy = (np.random.rand(2)*2-1.0)*PERTURB
+	# uniform [-1,1] * σ
+	#dxy = (np.random.randn(2))*PERTURB
 	cand.xy[:,j] = cand.xy[:,j] + dxy
 	#print p.get_pot(), p.get_kin()
 	#print p.get_pot() - cand.get_pot(), p.get_kin() - cand.get_kin()
@@ -147,10 +153,10 @@ pl.plot(ta,np.array(seqa)*0.0,'k')
 
 
 xyz = np.concatenate(hyper_traj,axis=0)
-print(xyz.shape) #(:, 2, xcount)
+print(xyz.shape) #(:, 2, ntimesteps)
 pl.figure()
 # pl.hold(true)
-for ii in [3,5]: # out of xcount
+for ii in [3,5]: # out of ntimesteps
     pl.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
     pl.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.2)
     pl.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.-')
