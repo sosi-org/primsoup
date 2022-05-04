@@ -1,5 +1,7 @@
 # primsoup
 
+Small mini-projects. Primordial Soup
+
 Also see:
 * https://github.com/sohale/snippets
 * https://gist.github.com/sohale (gists)
