@@ -9,7 +9,8 @@ This script finds a tajectory that minimises the Lagrange-ian Action,
 for given start and end points.
 
 It uses random local search (some local Monte Carlo) in space of trajectories.
-IT is not an efficient algorithm, also uses a crude and naïve/rudimentary/primitive representation of functionals.
+It is not an efficient algorithm.
+It uses a crude and naïve/rudimentary/primitive representation of functionals.
 '''
 
 
