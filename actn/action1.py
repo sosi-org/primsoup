@@ -55,6 +55,9 @@ class Path:
 	def get_action(self):
 		return self.get_kin() - self.get_pot()
 
+#PER_HOW_MANY = 500
+PER_HOW_MANY = 50*10
+
 slowda=0
 seqa=[]
 seqoa=[]
@@ -63,9 +66,11 @@ p=Path()
 p.xy[:,0]=(0,0)
 p.xy[:,-1]=(5,1)
 #pl.plot(p.xy[0,:],p.xy[1,:], 'b')
-for i in range(0,int(100000/2)):
-	if i % 500 ==0:
+for i in range(0,int(2*100000/2)):
+	if i % PER_HOW_MANY ==0:
+		handle = \
 		pl.plot(p.xy[0,:],p.xy[1,:], 'b') #, 'color',(0.3,0.3,0.3) )
+		handle[0].set_linewidth(0.2)
 		print(i)
 		#pl.draw()
 		pl.pause(0.001)
@@ -105,7 +110,7 @@ for i in range(0,int(100000/2)):
 	seqoa.append(a)
 
 	ctr+=1
-	if ctr % 500 ==0:
+	if ctr % PER_HOW_MANY ==0:
 		print( p.get_action() )
 	#print( p.get_action() )
 
@@ -115,4 +120,5 @@ ta=np.arange(0.0,float(len(seqa)))/float(len(seqa))
 pl.plot(ta,np.array(seqoa),'r')
 pl.plot(ta[1:],np.diff(seqa)/DT *10)
 pl.plot(ta,np.array(seqa)*0.0,'k')
+print('Finished. Close the plot.')
 pl.show()
