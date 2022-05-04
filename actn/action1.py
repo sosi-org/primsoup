@@ -25,10 +25,10 @@ _KG, _Gr = 1.0, 0.001
 _CM = 0.01
 
 # todo: xdim, ydim
-target_x_meters = 5.0 #* 2 #* 100.0 #    * 5.0 # *100
+target_x_meters = 15.0 #* 2 #* 100.0 #    * 5.0 # *100
 target_y_meters = 1.0 #* 30
 target_t_sec = 0.1  # 100 msec?!
-ntimesteps = 10
+ntimesteps = 10*2
 #ntimesteps = 20  # todo: not stable / converging to the same value when ntimesteps (discritisation segments of timespace trajectory) is increased
 #ntimesteps = 10+15 # segments of trajectory (nsteps = nsegments of time)
 # = p.xy.shape[1]
@@ -51,7 +51,7 @@ class Trajectory:
             # initial path
             self.xy = np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=S_DIM) * np.array([target_x_meters,target_y_meters])[:,None]
 
-        self.m = 1.0 * 0.0001 * _KG
+        self.m = 1.0 * _KG
         self.dt= target_t_sec / float(ntimesteps)
 
     def get_pot(self):
@@ -120,7 +120,7 @@ p.xy[:,0]=(0.0,0.0)
 p.xy[:,-1]=(target_x_meters,target_y_meters)
 #pl.plot(p.xy[0,:],p.xy[1,:], 'b')
 
-MAX_COUNT = int(100000/2 * 1.4  * 10/10)
+MAX_COUNT = int(100000/2 * 1.4  * 10/10*3)
 # MAX_COUNT =10000 # more brief, for debug
 
 for i in range(0,MAX_COUNT):
@@ -195,7 +195,7 @@ DT=1.0 # not physical time
 ax2.plot(ta,np.array(seqoa),'r', label='A')
 ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000, 'k.', markersize=0.2, label='ΔA')
 ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/DT*1000, 'b', label='dA')  # dx/dt
-ax2.set_xscale('log')
+# ax2.set_xscale('log')
 ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
 
 # Plot certain streaks in the overall trajectory of learning
