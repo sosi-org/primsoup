@@ -55,6 +55,9 @@ class Path:
 	def get_action(self):
 		return self.get_kin() - self.get_pot()
 
+# hyper/meta trajectory
+hyper_traj = []
+
 #PER_HOW_MANY = 500
 PER_HOW_MANY = 50*10
 
@@ -66,8 +69,15 @@ p=Path()
 p.xy[:,0]=(0,0)
 p.xy[:,-1]=(5,1)
 #pl.plot(p.xy[0,:],p.xy[1,:], 'b')
-for i in range(0,int(2*100000/2)):
+
+MAX_COUNT = int(100000/2 * 1.4)
+# MAX_COUNT =10000 # more brief, for debug
+
+for i in range(0,MAX_COUNT):
 	if i % PER_HOW_MANY ==0:
+
+		hyper_traj.append((p.xy[:2,:])[None,:,:])
+
 		handle = \
 		pl.plot(p.xy[0,:],p.xy[1,:], 'b') #, 'color',(0.3,0.3,0.3) )
 		handle[0].set_linewidth(0.2)
@@ -120,5 +130,16 @@ ta=np.arange(0.0,float(len(seqa)))/float(len(seqa))
 pl.plot(ta,np.array(seqoa),'r')
 pl.plot(ta[1:],np.diff(seqa)/DT *10)
 pl.plot(ta,np.array(seqa)*0.0,'k')
+
+
+xyz = np.concatenate(hyper_traj,axis=0)
+print(xyz.shape) #(:, 2, 10)
+pl.figure()
+#pl.hold(true)
+for ii in [3,5]: # out of 10
+    pl.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
+    pl.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.2)
+    pl.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.-')
+
 print('Finished. Close the plot.')
 pl.show()
