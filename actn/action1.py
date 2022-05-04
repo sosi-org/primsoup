@@ -77,7 +77,7 @@ PER_HOW_MANY = 50*10
 slowda=0
 seqa=[]
 seqoa=[]
-ctr=0
+accepted_count = 0
 p=Trajectory()
 # clamp end points
 p.xy[:,0]=(0.0,0.0)
@@ -88,7 +88,8 @@ MAX_COUNT = int(100000/2 * 1.4) * 10
 # MAX_COUNT =10000 # more brief, for debug
 
 for i in range(0,MAX_COUNT):
-	if i % PER_HOW_MANY ==0:
+	sometimes = i % PER_HOW_MANY == 0
+	if sometimes:
 
 		hyper_traj.append((p.xy[:,:])[None,:,:])
 
@@ -106,13 +107,16 @@ for i in range(0,MAX_COUNT):
 	cand = Trajectory(p)
 	#print p.get_pot()
 	#print p.get_kin()
-	j = int(np.random.rand()*p.xy.shape[S_DIM])
-	#print j
+
+	# Mutation site: @(s=j)
+	#j = int(np.random.rand()*p.xy.shape[S_DIM])
+	j = np.random.randint(0, p.xy.shape[S_DIM])
 	assert j >= 0
 	assert j < ntimesteps
-	if j==0:
+	# Don't mutate clamped positions:
+	if j == 0:
 		continue
-	if j==cand.xy.shape[1]-1:
+	if j == cand.xy.shape[1]-1:
 		continue
 
 	##############
@@ -142,8 +146,8 @@ for i in range(0,MAX_COUNT):
 	seqa.append(slowda)
 	seqoa.append(a)
 
-	ctr+=1
-	if ctr % PER_HOW_MANY ==0:
+	accepted_count += 1
+	if accepted_count % PER_HOW_MANY ==0:
 		print( p.get_action() )
 	#print( p.get_action() )
 
