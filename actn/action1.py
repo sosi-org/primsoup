@@ -112,7 +112,6 @@ hyper_traj = []
 PER_HOW_MANY = 50*10
 
 slowda=0.011
-seqa=[]
 seqoa=[]
 seqoa_i=[]
 accepted_count = 0
@@ -159,7 +158,6 @@ for i in range(0,MAX_COUNT):
     #Temp = 100.0
     #probr = math.exp( -abs(da)/Temp )
     #print probr
-    #seqa.append(action_new)
 
     # accept the mutation
     p = cand
@@ -168,7 +166,6 @@ for i in range(0,MAX_COUNT):
     if slowda == 0.011:
       slowda = action_new
     slowda = slowda * (1.0-alpha) + action_new * (alpha)
-    seqa.append(slowda)
     seqoa.append(action_new)
     seqoa_i.append(i)
 
@@ -204,10 +201,8 @@ ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
 
 ax2.plot(ta,np.array(seqoa),'r', label='A')
 ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000,'k.', label='ΔA')
-#ax2.plot(ta[1:],np.diff(seqa)/DT*1000, 'm', label='dA1')  # dx/dt
 ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/DT*1000 + 0.04    , 'b', label='dA2')  # dx/dt
 
-#ax2.plot(ta,np.array(seqa)*0.0,'k')
 ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
 
 # Plot certain streaks in the overall trajectory of learning
