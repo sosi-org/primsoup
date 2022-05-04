@@ -21,6 +21,11 @@ import numpy as np
 import math
 import matplotlib.pylab as pl
 
+xlen = 5.0 #* 2 #* 100.0 #	* 5.0 # *100
+ylen = 1.0 #* 30
+#xcount = 10
+#xcount = 20  # todo: not stable / converging to the same value when xcount (discritisation segments) is increased
+xcount = 10
 
 
 class Path:
@@ -31,8 +36,11 @@ class Path:
 		if not pth is None:
 			self.xy =pth.xy.copy()
 		else:
-			#self.xy = np.zeros((2,10))
-			self.xy = np.cumsum(np.random.rand(2,10),axis=1)
+			#self.xy = np.zeros((2,xcount))
+			# initial path
+			self.xy = np.cumsum(np.random.rand(2,xcount)/(float(xcount)/2), axis=1) * np.array([xlen,ylen])[:,None]
+			print(self.xy)
+
 		#self.A=np.zeros((2,))
 		#self.B=np.zeros((2,))
 		self.m=1
@@ -66,11 +74,12 @@ seqa=[]
 seqoa=[]
 ctr=0
 p=Path()
-p.xy[:,0]=(0,0)
-p.xy[:,-1]=(5,1)
+# clamp end points
+p.xy[:,0]=(0.0,0.0)
+p.xy[:,-1]=(xlen,ylen)
 #pl.plot(p.xy[0,:],p.xy[1,:], 'b')
 
-MAX_COUNT = int(100000/2 * 1.4)
+MAX_COUNT = int(100000/2 * 1.4) * 10
 # MAX_COUNT =10000 # more brief, for debug
 
 for i in range(0,MAX_COUNT):
@@ -92,7 +101,7 @@ for i in range(0,MAX_COUNT):
 	j = int(np.random.rand()*p.xy.shape[1])
 	#print j
 	assert j>=0
-	assert j<10
+	assert j<xcount
 	if j==0:
 		continue
 	if j==cand.xy.shape[1]-1:
@@ -101,8 +110,8 @@ for i in range(0,MAX_COUNT):
 	##############
 	# Mutation
 	##############
-	PERTURB = 0.001*100
-	dxy = (np.random.rand(2)*2-1)*PERTURB
+	PERTURB = 0.001*100 * 0.5
+	dxy = (np.random.randn(2))*PERTURB
 	cand.xy[:,j] = cand.xy[:,j] + dxy
 	#print p.get_pot(), p.get_kin()
 	#print p.get_pot() - cand.get_pot(), p.get_kin() - cand.get_kin()
@@ -133,15 +142,15 @@ DT=0.01
 pl.plot(p.xy[0,:],p.xy[1,:], 'k')
 ta=np.arange(0.0,float(len(seqa)))/float(len(seqa))
 pl.plot(ta,np.array(seqoa),'r')
-pl.plot(ta[1:],np.diff(seqa)/DT *10)
+pl.plot(ta[1:],np.diff(seqa)/DT *10)  # dx/dt
 pl.plot(ta,np.array(seqa)*0.0,'k')
 
 
 xyz = np.concatenate(hyper_traj,axis=0)
-print(xyz.shape) #(:, 2, 10)
+print(xyz.shape) #(:, 2, xcount)
 pl.figure()
 # pl.hold(true)
-for ii in [3,5]: # out of 10
+for ii in [3,5]: # out of xcount
     pl.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
     pl.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.2)
     pl.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.-')
