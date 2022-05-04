@@ -63,7 +63,7 @@ p=Path()
 p.xy[:,0]=(0,0)
 p.xy[:,-1]=(5,1)
 #pl.plot(p.xy[0,:],p.xy[1,:], 'b')
-for i in range(0,100000/2):
+for i in range(0,int(100000/2)):
 	if i %500 ==0:
 		pl.plot(p.xy[0,:],p.xy[1,:], 'b') #, 'color',(0.3,0.3,0.3) )
 	cand = Path(p)
