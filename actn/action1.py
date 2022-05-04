@@ -98,6 +98,9 @@ for i in range(0,MAX_COUNT):
 	if j==cand.xy.shape[1]-1:
 		continue
 
+	##############
+	# Mutation
+	##############
 	PERTURB = 0.001*100
 	dxy = (np.random.rand(2)*2-1)*PERTURB
 	cand.xy[:,j] = cand.xy[:,j] + dxy
@@ -124,6 +127,8 @@ for i in range(0,MAX_COUNT):
 		print( p.get_action() )
 	#print( p.get_action() )
 
+pl.figure()
+# What is this figure showing?
 DT=0.01
 pl.plot(p.xy[0,:],p.xy[1,:], 'k')
 ta=np.arange(0.0,float(len(seqa)))/float(len(seqa))
@@ -135,7 +140,7 @@ pl.plot(ta,np.array(seqa)*0.0,'k')
 xyz = np.concatenate(hyper_traj,axis=0)
 print(xyz.shape) #(:, 2, 10)
 pl.figure()
-#pl.hold(true)
+# pl.hold(true)
 for ii in [3,5]: # out of 10
     pl.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
     pl.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.2)
