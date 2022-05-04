@@ -112,8 +112,7 @@ def rand_path(ntimesteps):
 # hyper/meta trajectory
 hyper_traj = []
 
-#PER_HOW_MANY = 500
-PER_HOW_MANY = 50*10
+PER_HOW_MANY = 500
 
 seqoa=[]
 seqoa_i=[]
@@ -140,7 +139,6 @@ for i in range(0,MAX_COUNT):
     # Acceptance criteria
     action_new = cand.get_action()
     da = action_new - currentTraj.get_action()
-    #print da
     if da > 0: # Got worse (increased). We want the least action
         continue
 
@@ -164,8 +162,7 @@ def filter1(a, alpha):
     b = a.copy()
     slowa = a[0]
     for i in range(1, b.shape[0]):
-        slowa = slowa * (1.0-alpha) + a[i] * (alpha)
-        b[i] = slowa
+        b[i] = slowa = slowa * (1.0-alpha) + a[i] * (alpha)
     return b
 
 ############
@@ -179,15 +176,15 @@ def filter1(a, alpha):
 ta=np.arange(0.0,float(len(seqoa)))/float(len(seqoa))
 
 fig, (ax1, ax2) = pl.subplots(1, 2)
-# 0.01
-DT=1.0 # not physical time
+
+Dτ=1.0 # not physical time, # 0.01
 
 ax2.plot(ta,np.array(seqoa),'r', label='A')
 ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000, 'k.', markersize=0.2, label='ΔA')
-ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/DT*1000, 'b', label='dA')  # dx/dt
+ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/Dτ*1000, 'b', label='dA')  # dx/dt
 # ax2.set_xscale('log')
 ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
-ax2.set_ylim((-5000, 200))
+ax2.set_ylim((-5000, 500))
 
 
 # Plot certain streaks in the overall trajectory of learning
