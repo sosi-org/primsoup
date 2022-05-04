@@ -95,12 +95,15 @@ def mutate(old_traj):
 
 #def accept_mutation(cand, old_traj):
 #    return
+def mouse_move(event):
+    currentTraj.xy[:,-1] = [event.xdata, event.ydata]
 
 def live_fig_update(currentTraj, i):
     handle = pl.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'b') #, 'color',(0.3,0.3,0.3) )
     handle[0].set_linewidth(0.2)
     pl.gca().set_aspect('equal')
     print(i)
+    pl.connect('motion_notify_event', mouse_move)
     #pl.draw()
     pl.pause(0.001)
     print( currentTraj.get_action() )
@@ -112,7 +115,7 @@ def rand_path(ntimesteps):
 # hyper/meta trajectory
 hyper_traj = []
 
-PER_HOW_MANY = 500
+PER_HOW_MANY = 500*2
 
 seqoa=[]
 seqoa_i=[]
@@ -122,7 +125,7 @@ currentTraj = Trajectory(initial_path_xy=rand_path(ntimesteps) * target_xy_meter
 currentTraj.xy[:,0] = (0.0, 0.0)
 currentTraj.xy[:,-1] = target_xy_meters
 
-MAX_COUNT = int(100000/2 * 1.4  * 10/10*3)
+MAX_COUNT = int(210000)
 # MAX_COUNT =10000 # more brief, for debug
 
 for i in range(0,MAX_COUNT):
@@ -157,8 +160,7 @@ for i in range(0,MAX_COUNT):
         print( currentTraj.get_action() )
 
 def filter1(a, alpha):
-    a=np.array(a); print(a.shape)
-    assert len(a.shape) == 1
+    a = np.array(a); assert len(a.shape) == 1
     b = a.copy()
     slowa = a[0]
     for i in range(1, b.shape[0]):
