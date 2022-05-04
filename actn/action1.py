@@ -38,7 +38,7 @@ Y_AXIS = 1
 # Should reach y=100
 
 class Path:
-	g = 9.8
+	g = 9.8  *10000.0
 	def __init__(self, pth=None): #,A,B):
 		#self.xy[:,0]=np.array[0]
 		#self.xy[:,1]=[0]
@@ -52,7 +52,7 @@ class Path:
 
 		#self.A=np.zeros((2,))
 		#self.B=np.zeros((2,))
-		self.m = 1.0 * _KG
+		self.m = 1.0 * (0.01 * 0.01) * _KG
 		#self.m_segm = self._m / float(ntimesteps) # mass per segment
 		#self.t = ?
 		self.dt= target_t_sec / float(ntimesteps)
@@ -63,11 +63,11 @@ class Path:
 		return np.diff(self.xy, axis=1)
 
 	def get_pot(self):
-		return np.sum(self.g *10000.0 * self.m  * (0.01 * 0.01) * self.xy[Y_AXIS,:]) * self.dt
+		return np.sum(self.g * self.m  * self.xy[Y_AXIS,:]) * self.dt
 
 	def get_kin(self):
 		v = self.piecewise() / self.dt
-		xy=np.sum(0.5 * self.m    * (0.01 * 0.01) * v * v, axis=0)
+		xy=np.sum(0.5 * self.m * v * v, axis=0)
 		return np.sum(xy) * self.dt #x+y
 
 	def get_action(self):
