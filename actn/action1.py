@@ -44,19 +44,14 @@ class World:
 	g = 9.8 * 10000.0
 
 class Trajectory:
-	def __init__(self, trajc=None): #,A,B):
-		#self.xy[:,0]=np.array[0]
-		#self.xy[:,1]=[0]
+	def __init__(self, trajc=None):
 		if not trajc is None:
 			self.xy = trajc.xy.copy()
 		else:
-			#self.xy = np.zeros((2,ntimesteps))
 			# initial path
 			self.xy = np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=S_DIM) * np.array([target_x_meters,target_y_meters])[:,None]
 
 		self.m = 1.0 * 0.0001 * _KG
-
-		#self.t = ?
 		self.dt= target_t_sec / float(ntimesteps)
 
 	def get_pot(self):
