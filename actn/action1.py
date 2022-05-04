@@ -40,26 +40,28 @@ ntimesteps = 10
 
 # Should reach y=100
 
-class Trajectory:
+class World:
 	g = 9.8 * 10000.0
-	def __init__(self, pth=None): #,A,B):
+
+class Trajectory:
+	def __init__(self, trajc=None): #,A,B):
 		#self.xy[:,0]=np.array[0]
 		#self.xy[:,1]=[0]
-		if not pth is None:
-			self.xy =pth.xy.copy()
+		if not trajc is None:
+			self.xy = trajc.xy.copy()
 		else:
 			#self.xy = np.zeros((2,ntimesteps))
 			# initial path
 			self.xy = np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=S_DIM) * np.array([target_x_meters,target_y_meters])[:,None]
-			print(self.xy)
 
 		self.m = 1.0 * 0.0001 * _KG
+
 		#self.t = ?
 		self.dt= target_t_sec / float(ntimesteps)
 
 	def get_pot(self):
 		h = self.xy[Y_AXIS,:]
-		mgh = self.g * self.m  * h
+		mgh = World.g * self.m  * h
 		return np.sum(mgh) * self.dt  # integral = ∫ (mgh) dt
 
 	def get_kin(self):
