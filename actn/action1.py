@@ -191,8 +191,6 @@ ta=np.arange(0.0,float(len(seqoa)))/float(len(seqoa))
 fig, (ax1, ax2) = pl.subplots(1, 2)
 # 0.01
 DT=1.0 # not physical time
-ax1.plot(p.xy[X_AXIS,:],p.xy[Y_AXIS,:], 'k')
-ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
 
 ax2.plot(ta,np.array(seqoa),'r', label='A')
 ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000, 'k.', markersize=0.2, label='ΔA')
@@ -203,13 +201,15 @@ ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
 # Plot certain streaks in the overall trajectory of learning
 xyz = np.concatenate(hyper_traj,axis=0)
 print(xyz.shape) #(:, 2, ntimesteps)
-pl.figure()
+ax1.plot(p.xy[X_AXIS,:],p.xy[Y_AXIS,:], 'k')
+ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
+#pl.figure()
 # pl.hold(true)
 for ii in [3,5]: # out of ntimesteps
-    pl.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
-    pl.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.4)
-    pl.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.-')
-    pl.gca().set(xlabel='x', ylabel='y')
+    ax1.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
+    ax1.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.4)
+    ax1.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.--')
+    ax1.set(xlabel='x', ylabel='y') #pl.gca().set
 
 print('Finished. Close the plot. Press Q')
 pl.show()
