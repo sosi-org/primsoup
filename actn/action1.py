@@ -5,14 +5,13 @@
 actn: Simple Action Minimizer
 
 Based on the concept of "Action" defined on "trajectories".
-Action and Lagragian are concepts defined by Joseph-Louis Lagrange
-that are able to describe the whole classical mechanics.
+Action = ∫ Lagragian dt, defined by Joseph-Louis Lagrange
+is able to describe classical mechanics.
 
-This script finds a tajectory that minimises the Lagrange-ian Action,
-for given start and end points.
+This script finds a tajectory that minimises the Action, given the start and end points.
 
 It uses random local search (some local Monte Carlo) in space of trajectories.
-It is not an efficient algorithm.
+It is not a particularly efficient algorithm.
 It uses a crude and naïve/rudimentary/primitive representation of functionals.
 '''
 
@@ -44,13 +43,13 @@ class World:
 
 class Trajectory:
     def __init__(self, trajc=None, initial_path_xy=None):
-        if not trajc is None:
-            self.xy = trajc.xy.copy()
-            (self.m, self.dt) = (trajc.m, trajc.dt)
-        else:
+        if trajc is None:
             self.xy = initial_path_xy.copy()
             self.m = 1.0 * _KG
-            self.dt= target_t_sec / float(ntimesteps)
+            self.dt = target_t_sec / float(ntimesteps)
+        else:
+            self.xy = trajc.xy.copy()
+            (self.m, self.dt) = (trajc.m, trajc.dt)
 
     def get_pot(self):
         h = self.xy[Y_AXIS,:]
@@ -67,7 +66,7 @@ class Trajectory:
         return self.get_kin() - self.get_pot()
 
 def mutate(old_traj):
-    # candidate trajectory
+    # Candidate trajectory
     cand = Trajectory(old_traj)
 
     #############
@@ -86,11 +85,9 @@ def mutate(old_traj):
     ##############
     # Mutation
     ##############
-    PERTURB = np.array([0.1,0.1/10.0*2])
-    # Normal(0,σ)
-    uxy = (np.random.rand(2)*2-1.0)
-    # uniform [-1,1] * σ
-    #uxy = (np.random.randn(2))
+    PERTURB = np.array([0.1, 0.02])
+    uxy = (np.random.rand(2)*2-1.0)     # Normal(0,σ)
+    #uxy = (np.random.randn(2))         # uniform [-1,1] * σ
     cand.xy[:,j] = cand.xy[:,j] + uxy * PERTURB[:]
     # todo: visualise (K,T), subtract (K'-K, T'-T)
 
@@ -98,6 +95,16 @@ def mutate(old_traj):
 
 #def accept_mutation(cand, old_traj):
 #    return
+
+def live_fig_update(currentTraj, i):
+    handle = pl.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'b') #, 'color',(0.3,0.3,0.3) )
+    handle[0].set_linewidth(0.2)
+    pl.gca().set_aspect('equal')
+    print(i)
+    #pl.draw()
+    pl.pause(0.001)
+    print( currentTraj.get_action() )
+    pl.show(block=False)
 
 def rand_path(ntimesteps):
     return np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=S_DIM)
@@ -122,28 +129,15 @@ MAX_COUNT = int(100000/2 * 1.4  * 10/10*3)
 for i in range(0,MAX_COUNT):
     sometimes = i % PER_HOW_MANY == 0
     if sometimes:
-
         hyper_traj.append((currentTraj.xy[:,:])[None,:,:])
+        live_fig_update(currentTraj, i)
 
-        handle = \
-        pl.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'b') #, 'color',(0.3,0.3,0.3) )
-        handle[0].set_linewidth(0.2)
-        pl.gca().set_aspect('equal')
-        print(i)
-        #pl.draw()
-        pl.pause(0.001)
-        print( currentTraj.get_action() )
-        pl.show(block=False)
-
-    # candidate trajectory
-
+    # Candidate trajectory
     cand = mutate(currentTraj)
     if cand == None:
-        # skip
-        continue
+        continue # skip
 
     # Acceptance criteria
-
     action_new = cand.get_action()
     da = action_new - currentTraj.get_action()
     #print da
@@ -193,6 +187,8 @@ ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000, 'k.', markersize=0.2, label='ΔA'
 ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/DT*1000, 'b', label='dA')  # dx/dt
 # ax2.set_xscale('log')
 ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
+ax2.set_ylim((-5000, 200))
+
 
 # Plot certain streaks in the overall trajectory of learning
 xyz = np.concatenate(hyper_traj,axis=0)
