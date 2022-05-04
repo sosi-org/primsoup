@@ -38,7 +38,7 @@ Y_AXIS = 1
 # Should reach y=100
 
 class Path:
-	g = 9.8  *10000.0
+	g = 9.8 * 10000.0
 	def __init__(self, pth=None): #,A,B):
 		#self.xy[:,0]=np.array[0]
 		#self.xy[:,1]=[0]
@@ -52,7 +52,7 @@ class Path:
 
 		#self.A=np.zeros((2,))
 		#self.B=np.zeros((2,))
-		self.m = 1.0 * (0.01 * 0.01) * _KG
+		self.m = 1.0 * 0.0001 * _KG
 		#self.m_segm = self._m / float(ntimesteps) # mass per segment
 		#self.t = ?
 		self.dt= target_t_sec / float(ntimesteps)
