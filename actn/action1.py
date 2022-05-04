@@ -197,7 +197,7 @@ ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
 
 ax2.plot(ta,np.array(seqoa),'r', label='A')
 ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000,'k.', label='ΔA')
-ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/DT*1000 + 0.04    , 'b', label='dA2')  # dx/dt
+ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/DT*1000, 'b', label='dA')  # dx/dt
 
 ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
 
