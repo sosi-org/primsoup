@@ -207,7 +207,7 @@ pl.figure()
 # pl.hold(true)
 for ii in [3,5]: # out of ntimesteps
     pl.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
-    pl.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.2)
+    pl.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.4)
     pl.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.-')
     pl.gca().set(xlabel='x', ylabel='y')
 
