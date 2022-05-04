@@ -63,7 +63,7 @@ class Path:
 		return np.diff(self.xy, axis=1)
 
 	def get_pot(self):
-		return np.sum(self.g * self.m  * (0.01 * 0.01)*10000.0 * self.xy[Y_AXIS,:]) * self.dt
+		return np.sum(self.g *10000.0 * self.m  * (0.01 * 0.01) * self.xy[Y_AXIS,:]) * self.dt
 
 	def get_kin(self):
 		v = self.piecewise() / self.dt
