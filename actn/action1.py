@@ -36,8 +36,6 @@ ntimesteps = 10*2
 # x(s), y(s), t(s)
 # s = (time)steps
 
-# Should reach y=100
-
 class World:
     g = 9.8 * 1000.0
 
@@ -57,7 +55,6 @@ class Trajectory:
         return np.sum(mgh) * self.dt  # integral = ∫ (mgh) dt
 
     def get_kin(self):
-        # diff: piecewise
         v = np.diff(self.xy, axis=S_DIM) / self.dt
         mv2 = np.sum(0.5 * self.m * v * v, axis=XY_DIM)
         return np.sum(mv2) * self.dt  # integral =  ∫ (0.5 mv^2) dt
@@ -156,7 +153,7 @@ for i in range(0,MAX_COUNT):
     seqoa_i.append(i)
 
     accepted_count += 1
-    if accepted_count % PER_HOW_MANY ==0:
+    if accepted_count % PER_HOW_MANY == 0:
         print( currentTraj.get_action() )
 
 def filter1(a, alpha):
@@ -184,7 +181,7 @@ Dτ=1.0 # not physical time, # 0.01
 ax2.plot(ta,np.array(seqoa),'r', label='A')
 ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000, 'k.', markersize=0.2, label='ΔA')
 ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/Dτ*1000, 'b', label='dA')  # dx/dt
-# ax2.set_xscale('log')
+ax2.set_xscale('log')
 ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
 ax2.set_ylim((-5000, 500))
 
