@@ -69,6 +69,36 @@ class Trajectory:
         return self.get_kin() - self.get_pot()
 
 def mutate(old_traj):
+    # candidate trajectory
+    cand = Trajectory(p)
+    #print p.get_pot()
+    #print p.get_kin()
+
+    #############
+    # Mutation site: @(s=j)
+    ##############
+    #j = int(np.random.rand()*p.xy.shape[S_DIM])
+    j = np.random.randint(0, p.xy.shape[S_DIM])
+    assert j >= 0
+    assert j < ntimesteps
+    # Don't mutate clamped positions:
+    if j == 0:
+        return None
+
+    if j == cand.xy.shape[1]-1:
+        return None
+
+    ##############
+    # Mutation
+    ##############
+    PERTURB = 0.1
+    # Normal(0,σ)
+    dxy = (np.random.rand(2)*2-1.0)*PERTURB
+    # uniform [-1,1] * σ
+    #dxy = (np.random.randn(2))*PERTURB
+    cand.xy[:,j] = cand.xy[:,j] + dxy
+    #print p.get_pot(), p.get_kin()
+    #print p.get_pot() - cand.get_pot(), p.get_kin() - cand.get_kin()
 
     return cand
 
@@ -110,67 +140,41 @@ for i in range(0,MAX_COUNT):
         print( p.get_action() )
         pl.show(block=False)
 
-  # candidate trajectory
-    cand = Trajectory(p)
-    #print p.get_pot()
-    #print p.get_kin()
+    # candidate trajectory
 
-    # Mutation site: @(s=j)
-    #j = int(np.random.rand()*p.xy.shape[S_DIM])
-    j = np.random.randint(0, p.xy.shape[S_DIM])
-    assert j >= 0
-    assert j < ntimesteps
-    # Don't mutate clamped positions:
-    if j == 0:
-        #return None
+    cand = mutate(p)
+    if cand == None:
+        # skip
         continue
-    if j == cand.xy.shape[1]-1:
-        #return None
-        continue
-
-    #if cand == None:
-    #    continue
-
-    ##############
-    # Mutation
-    ##############
-    PERTURB = 0.1
-    # Normal(0,σ)
-    dxy = (np.random.rand(2)*2-1.0)*PERTURB
-    # uniform [-1,1] * σ
-    #dxy = (np.random.randn(2))*PERTURB
-    cand.xy[:,j] = cand.xy[:,j] + dxy
-    #print p.get_pot(), p.get_kin()
-    #print p.get_pot() - cand.get_pot(), p.get_kin() - cand.get_kin()
 
     # Acceptance criteria
 
-    a=cand.get_action()
-    da= a - p.get_action()
+    action_new = cand.get_action()
+    da = action_new - p.get_action()
     #print da
-    if da>0: #worse
+    if da > 0: # Got worse (increased). We want the least action
         continue
+
     #Temp = 100.0
     #probr = math.exp( -abs(da)/Temp )
     #print probr
-    #seqa.append(a)
+    #seqa.append(action_new)
 
     # accept the mutation
     p = cand
 
     alpha=0.01
-    slowda = slowda * (1.0-alpha) + a * (alpha)
+    slowda = slowda * (1.0-alpha) + action_new * (alpha)
     seqa.append(slowda)
-    seqoa.append(a)
+    seqoa.append(action_new)
 
     accepted_count += 1
     if accepted_count % PER_HOW_MANY ==0:
         print( p.get_action() )
-    #print( p.get_action() )
 
+# Plot overall indicators of trajectory of learning
 pl.figure()
 # What is this figure showing?
-#DT=0.01
 DT=p.dt # sec
 pl.plot(p.xy[X_AXIS,:],p.xy[Y_AXIS,:], 'k')
 ta=np.arange(0.0,float(len(seqa)))/float(len(seqa))
@@ -178,7 +182,7 @@ pl.plot(ta,np.array(seqoa),'r')
 pl.plot(ta[1:],np.diff(seqa)/DT *10)  # dx/dt
 pl.plot(ta,np.array(seqa)*0.0,'k')
 
-
+# Plot certain streaks in the overall trajectory of learning
 xyz = np.concatenate(hyper_traj,axis=0)
 print(xyz.shape) #(:, 2, ntimesteps)
 pl.figure()
