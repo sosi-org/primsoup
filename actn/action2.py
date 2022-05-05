@@ -39,6 +39,10 @@ def clamp(traj):
     mi = int(traj.xy.shape[1]/2)
     traj.xy[:,mi] = (7.5, -1.0)
 
+def generate_initial_path(ntimesteps):
+    # not very sensitive to initial conditions
+    return np.cumsum((np.random.randn(2,ntimesteps)+0.5)/(float(ntimesteps) * 0.5), axis=S_DIM) * target_xy_meters[:,None] # xy
+
 
 '''
 # failed
@@ -51,12 +55,8 @@ def clamp(traj):
     traj.xy = traj.xy * (1-alpha) + traj2.xy * alpha
 '''
 
-def generate_initial_path(ntimesteps):
-    # not very sensitive to initial conditions
-    return np.cumsum((np.random.randn(2,ntimesteps)+0.5)/(float(ntimesteps) * 0.5), axis=S_DIM) * target_xy_meters[:,None] # xy
-
 class World:
-    g = 9.8 * 1000.0
+    g = np.array([0, -9.8 * 1000.0])
 
 class Trajectory:
     def __init__(self, trajc=None, initial_path_xy=None):
@@ -69,8 +69,8 @@ class Trajectory:
             (self.m, self.dt) = (trajc.m, trajc.dt)
 
     def get_pot(self):
-        h = self.xy[Y_AXIS,:]
-        mgh = World.g * self.m  * h
+        gh =  np.sum(World.g[:,None] *  self.xy[:2,:], axis=XY_DIM)  # inner product g⋅x
+        mgh = self.m * gh
         return np.sum(mgh) * self.dt  # integral = ∫ (mgh) dt
 
     def get_kin(self):
@@ -125,7 +125,7 @@ def simulate():
     currentTraj = Trajectory(initial_path_xy=generate_initial_path(ntimesteps) )
     clamp(currentTraj)
 
-    MAX_COUNT = int(210000/20)
+    MAX_COUNT = int(210000)
 
     for i in range(0,MAX_COUNT):
         sometimes = (i % PER_HOW_MANY == 0) or (i < PER_HOW_MANY and i % 20 == 0)
@@ -170,14 +170,16 @@ def filter1(a, alpha):
         b[i] = slowa = slowa * (1.0-alpha) + a[i] * (alpha)
     return b
 
-def mouse_move(event):
-    currentTraj.xy[:,-1] = [event.xdata, event.ydata]
 
 def live_fig_update(currentTraj, i):
     handle = pl.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'b') #, 'color',(0.3,0.3,0.3) )
     handle[0].set_linewidth(0.2)
     pl.gca().set_aspect('equal')
     print(i)
+
+    def mouse_move(event):
+        currentTraj.xy[:,-1] = [event.xdata, event.ydata]
+
     pl.connect('motion_notify_event', mouse_move)
     #pl.draw()
     pl.pause(0.001)
