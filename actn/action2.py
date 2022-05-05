@@ -116,6 +116,62 @@ def mutate(old_traj):
 
 #def accept_mutation(cand, old_traj):
 #    return
+
+def simulate():
+    # hyper/meta trajectory
+    hyper_traj = []
+
+    PER_HOW_MANY = 500*2
+
+    seqoa=[]
+    seqoa_i=[]
+    accepted_count = 0
+    currentTraj = Trajectory(initial_path_xy=generate_initial_path(ntimesteps) )
+    clamp(currentTraj)
+
+    MAX_COUNT = int(210000/20)
+
+    for i in range(0,MAX_COUNT):
+        sometimes = (i % PER_HOW_MANY == 0) or (i < PER_HOW_MANY and i % 20 == 0)
+        if sometimes:
+            hyper_traj.append((currentTraj.xy[:,:])[None,:,:])
+            live_fig_update(currentTraj, i)
+
+        # Candidate trajectory
+        cand = mutate(currentTraj)
+        if cand == None:
+            continue # skip
+
+        # Acceptance criteria
+        action_new = cand.get_action()
+        da = action_new - currentTraj.get_action()
+        if da > 0: # Got worse (increased). We want the least action
+            continue
+
+        #Temp = 100.0
+        #probr = math.exp( -abs(da)/Temp )
+        #print probr
+
+        # accept the mutation
+        currentTraj = cand
+
+        seqoa.append(action_new)
+        seqoa_i.append(i)
+
+        accepted_count += 1
+        if accepted_count % PER_HOW_MANY == 0:
+            print( currentTraj.get_action() )
+
+    return currentTraj, seqoa, hyper_traj
+
+def filter1(a, alpha):
+    a = np.array(a); assert len(a.shape) == 1
+    b = a.copy()
+    slowa = a[0]
+    for i in range(1, b.shape[0]):
+        b[i] = slowa = slowa * (1.0-alpha) + a[i] * (alpha)
+    return b
+
 def mouse_move(event):
     currentTraj.xy[:,-1] = [event.xdata, event.ydata]
 
@@ -130,60 +186,7 @@ def live_fig_update(currentTraj, i):
     print( currentTraj.get_action() )
     pl.show(block=False)
 
-
-# hyper/meta trajectory
-hyper_traj = []
-
-PER_HOW_MANY = 500*2
-
-seqoa=[]
-seqoa_i=[]
-accepted_count = 0
-currentTraj = Trajectory(initial_path_xy=generate_initial_path(ntimesteps) )
-clamp(currentTraj)
-
-MAX_COUNT = int(210000)
-
-for i in range(0,MAX_COUNT):
-    sometimes = (i % PER_HOW_MANY == 0) or (i < PER_HOW_MANY and i % 20 == 0)
-    if sometimes:
-        hyper_traj.append((currentTraj.xy[:,:])[None,:,:])
-        live_fig_update(currentTraj, i)
-
-    # Candidate trajectory
-    cand = mutate(currentTraj)
-    if cand == None:
-        continue # skip
-
-    # Acceptance criteria
-    action_new = cand.get_action()
-    da = action_new - currentTraj.get_action()
-    if da > 0: # Got worse (increased). We want the least action
-        continue
-
-    #Temp = 100.0
-    #probr = math.exp( -abs(da)/Temp )
-    #print probr
-
-    # accept the mutation
-    currentTraj = cand
-
-    seqoa.append(action_new)
-    seqoa_i.append(i)
-
-    accepted_count += 1
-    if accepted_count % PER_HOW_MANY == 0:
-        print( currentTraj.get_action() )
-
-def filter1(a, alpha):
-    a = np.array(a); assert len(a.shape) == 1
-    b = a.copy()
-    slowa = a[0]
-    for i in range(1, b.shape[0]):
-        b[i] = slowa = slowa * (1.0-alpha) + a[i] * (alpha)
-    return b
-
-def overall_plot():
+def overall_plot(currentTraj, hyper_traj):
     ############
     # Plot overall indicators of trajectory of learning
     ############
@@ -197,12 +200,12 @@ def overall_plot():
     Dτ=1.0 # not physical time, # 0.01
 
     fig, (ax1, ax2) = pl.subplots(1, 2)
-    fig2(ax2)
-    fig1(ax1)
+    fig2(ax2, ta, Dτ)
+    fig1(ax1,   currentTraj, hyper_traj)
 
-def fig2(ax2):
+def fig2(ax2, ta, Dτ):
     h0, = ax2.plot(ta,np.array(seqoa),'r', label='A')
-    ax2b=ax2.twinx()
+    ax2b = ax2.twinx()
     h1, = ax2b.plot(ta[1:],np.diff(np.array(seqoa)), 'k.', markersize=0.2, label='ΔA')
     h2, = ax2b.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/Dτ, 'b', label='dA')  # dx/dt
 
@@ -238,7 +241,7 @@ def fig2_annot(aa, hhh):
         ax2b.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(0.2))
 
 
-def fig1(ax1):
+def fig1(ax1, currentTraj, hyper_traj):
     # Plot certain streaks in the overall trajectory of learning
     xyz = np.concatenate(hyper_traj,axis=0)
     print(xyz.shape) #(:, 2, ntimesteps)
@@ -251,8 +254,8 @@ def fig1(ax1):
         ax1.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.--')
         ax1.set(xlabel='x', ylabel='y') #pl.gca().set
 
-
-overall_plot()
+currentTraj, seqoa, hyper_traj = simulate()
+overall_plot(currentTraj, hyper_traj)
 
 print('Finished. Close the plot. Press Q')
 pl.show()
