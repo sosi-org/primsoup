@@ -13,6 +13,9 @@ This script finds a tajectory that minimises the Lagrange-ian Action.
 It uses random local search (some local Monte Carlo) in space of trajectories.
 
 ![graph](https://repository-images.githubusercontent.com/35192229/e892816d-3a9a-46d5-8730-037e30ac9b39)
+Left: Trajectories under minimization of A=∫L.
+Right: A(τ), Action across epocs (τ), and mean rate of decrease of A(τ).
+
 ### Also see:
 * https://github.com/sohale/snippets
 * https://gist.github.com/sohale (gists)
