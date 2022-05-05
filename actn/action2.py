@@ -30,7 +30,7 @@ user_mouse_fixation = []
 #target_x_meters = 15.0 #* 2 #* 100.0 #    * 5.0 # *100
 #target_y_meters = 1.0 #* 30
 target_xy_meters = np.array([15.0, 1.0])
-target_t_sec = 0.1  # 100 msec?!  Also corresponds to the index [-1] of clamp
+target_t_sec = 0.1 *40 # 100 msec?!  Also corresponds to the index [-1] of clamp
 
 def clamp(traj):
     # clamp end points
@@ -63,7 +63,7 @@ def clamp(traj):
 '''
 
 class World:
-    g = np.array([0, -9.8 * 1000.0])
+    g = np.array([0, -9.8])
 
 class Trajectory:
     def __init__(self, trajc=None, initial_path_xy=None):
@@ -77,7 +77,7 @@ class Trajectory:
 
     def get_pot(self):
         gh =  np.sum(World.g[:,None] *  self.xy[:2,:], axis=XY_DIM)  # inner product g⋅x
-        mgh = self.m * gh
+        mgh = - self.m * gh
         return np.sum(mgh) * self.dt  # integral = ∫ (mgh) dt
 
     def get_kin(self):
@@ -88,7 +88,7 @@ class Trajectory:
     def get_action(self):
         return self.get_kin() - self.get_pot()
 
-def mutate(old_traj):
+def mutate(old_traj, actr):
     # Candidate trajectory
     cand = Trajectory(old_traj)
 
@@ -108,7 +108,8 @@ def mutate(old_traj):
     ##############
     # Mutation
     ##############
-    PERTURB = np.array([0.1, 0.02])
+    ss = 1.0 # math.exp(-actr*0.0001) * 10
+    PERTURB = np.array([0.1, 0.02]) * ss
     uxy = (np.random.rand(2)*2-1.0)     # Normal(0,σ)
     #uxy = (np.random.randn(2))         # uniform [-1,1] * σ
     cand.xy[:,j] = cand.xy[:,j] + uxy * PERTURB[:]
@@ -141,7 +142,7 @@ def simulate():
             live_fig_update(currentTraj, i)
 
         # Candidate trajectory
-        cand = mutate(currentTraj)
+        cand = mutate(currentTraj, accepted_count)
         if cand == None:
             continue # skip
 
