@@ -4,11 +4,6 @@
 '''
 actn: Simple Action Minimizer: Experiment 2
 
-This script finds a tajectory that minimises the Action, given the start and end points.
-
-It uses random local search (some local Monte Carlo) in space of trajectories.
-It is not a particularly efficient algorithm.
-It uses a crude and naïve/rudimentary/primitive representation of functionals.
 '''
 
 
@@ -35,7 +30,7 @@ ntimesteps = 10*2
 target_xy_meters = np.array([15.0, 1.0])
 target_t_sec = 0.1  # 100 msec?!  Also corresponds to the index [-1] of clamp
 
-def clamp1(traj):
+def clamp(traj):
     # clamp end points
     traj.xy[:,0] = (0.0, 0.0)
     traj.xy[:,-1] = target_xy_meters
@@ -43,16 +38,18 @@ def clamp1(traj):
     # a clammp constrsaint is also equivalent to an implicit force
     mi = int(traj.xy.shape[1]/2)
     traj.xy[:,mi] = (7.5, -1.0)
-    #Also: get a bit closer to this
 
+
+'''
+# failed
+#get a bit closer to this (milder constraint force => won't work!)
 def clamp(traj):
-    clamp1(traj)
-    if False:
-      traj2 = Trajectory(traj)
-      clamp1(traj2)
-      # get a bit closer to traj2
-      alpha = 0.999
-      traj.xy = traj.xy * (1-alpha) + traj2.xy * alpha
+    traj2 = Trajectory(traj)
+    clamp1(traj2)
+    # get a bit closer to traj2
+    alpha = 0.999
+    traj.xy = traj.xy * (1-alpha) + traj2.xy * alpha
+'''
 
 def generate_initial_path(ntimesteps):
     # not very sensitive to initial conditions
@@ -155,7 +152,7 @@ def simulate():
         # accept the mutation
         currentTraj = cand
 
-        seqoa.append(action_new)
+        seqoa.append((i,action_new))
         seqoa_i.append(i)
 
         accepted_count += 1
@@ -204,10 +201,13 @@ def overall_plot(currentTraj, hyper_traj):
     fig1(ax1,   currentTraj, hyper_traj)
 
 def fig2(ax2, ta, Dτ):
-    h0, = ax2.plot(ta,np.array(seqoa),'r', label='A')
+    seqoa_2 = np.array(seqoa)
+    EPOC_I, ACTION_I = (0, 1)
+    # print(seqoa_2.shape) # (2442, 2)
+    h0, = ax2.plot(ta,seqoa_2[:,ACTION_I],'r', label='A')
     ax2b = ax2.twinx()
-    h1, = ax2b.plot(ta[1:],np.diff(np.array(seqoa)), 'k.', markersize=0.2, label='ΔA')
-    h2, = ax2b.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/Dτ, 'b', label='dA')  # dx/dt
+    h1, = ax2b.plot(ta[1:],np.diff(seqoa_2[:,ACTION_I]), 'k.', markersize=0.2, label='ΔA')
+    h2, = ax2b.plot(ta[1:],np.diff(filter1(seqoa_2[:,ACTION_I], 0.01))/Dτ, 'b', label='dA')  # dx/dt
 
     fig2_annot([ax2, ax2b], [h0,h1,h2])
 
