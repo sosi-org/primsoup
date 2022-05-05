@@ -20,10 +20,7 @@ import matplotlib.pylab as pl
 _KG, _Gr = 1.0, 0.001
 _CM = 0.01
 
-#target_x_meters = 15.0 #* 2 #* 100.0 #    * 5.0 # *100
-#target_y_meters = 1.0 #* 30
-target_xy_meters = np.array([15.0, 1.0])
-target_t_sec = 0.1  # 100 msec?!  Also corresponds to the index [-1] of clamp
+
 ntimesteps = 10*2
 # segments of trajectory (nsteps = nsegments of time), discritisation segments of timespace trajectory
 
@@ -31,6 +28,35 @@ ntimesteps = 10*2
 (XY_DIM, S_DIM) = (0, 1)
 # x(s), y(s), t(s)
 # s = (time)steps
+
+
+#target_x_meters = 15.0 #* 2 #* 100.0 #    * 5.0 # *100
+#target_y_meters = 1.0 #* 30
+target_xy_meters = np.array([15.0, 1.0])
+target_t_sec = 0.1  # 100 msec?!  Also corresponds to the index [-1] of clamp
+
+def clamp1(traj):
+    # clamp end points
+    traj.xy[:,0] = (0.0, 0.0)
+    traj.xy[:,-1] = target_xy_meters
+
+    # a clammp constrsaint is also equivalent to an implicit force
+    mi = int(traj.xy.shape[1]/2)
+    traj.xy[:,mi] = (7.5, -1.0)
+    #Also: get a bit closer to this
+
+def clamp(traj):
+    clamp1(traj)
+    if False:
+      traj2 = Trajectory(traj)
+      clamp1(traj2)
+      # get a bit closer to traj2
+      alpha = 0.999
+      traj.xy = traj.xy * (1-alpha) + traj2.xy * alpha
+
+def generate_initial_path(ntimesteps):
+    # not very sensitive to initial conditions
+    return np.cumsum((np.random.randn(2,ntimesteps)+0.5)/(float(ntimesteps) * 0.5), axis=S_DIM) * target_xy_meters[:,None] # xy
 
 class World:
     g = 9.8 * 1000.0
@@ -104,24 +130,6 @@ def live_fig_update(currentTraj, i):
     print( currentTraj.get_action() )
     pl.show(block=False)
 
-def clamp1(traj):
-    # clamp end points
-    traj.xy[:,0] = (0.0, 0.0)
-    traj.xy[:,-1] = target_xy_meters
-    mi = int(traj.xy.shape[1]/2)
-    traj.xy[:,mi] = (7.5, -1.0)
-    #Also: get a bit closer to this
-
-def clamp(traj):
-    traj2 = Trajectory(traj)
-    clamp1(traj2)
-    # get a bit closer to traj2
-    alpha = 0.999
-    traj.xy = traj.xy * (1-alpha) + traj2.xy * alpha
-
-def rand_path(ntimesteps):
-    # not very sensitive to initial conditions
-    return np.cumsum((np.random.randn(2,ntimesteps)+0.5)/(float(ntimesteps) * 0.5), axis=S_DIM) * target_xy_meters[:,None] # xy
 
 # hyper/meta trajectory
 hyper_traj = []
@@ -131,10 +139,10 @@ PER_HOW_MANY = 500*2
 seqoa=[]
 seqoa_i=[]
 accepted_count = 0
-currentTraj = Trajectory(initial_path_xy=rand_path(ntimesteps) )
+currentTraj = Trajectory(initial_path_xy=generate_initial_path(ntimesteps) )
 clamp(currentTraj)
 
-MAX_COUNT = int(210000)   # MAX_COUNT = 10000 # more brief, for debug
+MAX_COUNT = int(210000)
 
 for i in range(0,MAX_COUNT):
     sometimes = (i % PER_HOW_MANY == 0) or (i < PER_HOW_MANY and i % 20 == 0)
