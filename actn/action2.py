@@ -178,13 +178,15 @@ def filter1(a, alpha):
     return b
 
 
+fig_live = pl.figure()
+fig_live.gca().set_aspect('equal')
 def live_fig_update(currentTraj, i):
-    handle = pl.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'b') #, 'color',(0.3,0.3,0.3) )
-    handle[0].set_linewidth(0.2)
-    pl.gca().set_aspect('equal')
+    handle, = pl.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'b') #, 'color',(0.3,0.3,0.3) )
+    handle.set_linewidth(0.2)
 
     def mouse_move(event):
-        #currentTraj.xy[:,-1]
+        # currentTraj.xy[:,-1]
+        # print(event)
         if event.xdata is not None and event.ydata is not None:
             user_mouse_fixation[:] = [event.xdata, event.ydata]
 
