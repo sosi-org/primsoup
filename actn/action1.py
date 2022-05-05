@@ -185,13 +185,13 @@ ax2.set_xscale('log')
 #ax2.set(xlabel='τ (epoc)', ylabel='A'); ax2.legend() # ax2.set_title('τ,A') # Action
 ax2b.set_ylim((-8.000, 0.2))
 ax2.set(xlabel='τ (epoc)');
-ax2.set_ylabel ('A',  color='r')
+ax2.set_ylabel ('A = Action',  color='r')
 #ax2.yaxis.label.set_color(h0.get_color())
 ax2b.set_ylabel('ΔA', color='b') # ax2b.set(ylabel='ΔA')
 #ax2b.yaxis.label.set_color(h2.get_color())
 ax2.legend(handles=[h0, h1, h2], loc='lower center')
 #ax2b.spines.right.set_position(("outward", -10))
-ax2.spines.left.set_position(("outward", -20))
+ax2.spines.left.set_position(("outward", -30))
 ax2.spines.left.set_color('r')
 ax2b.spines.right.set_color('b')
 
