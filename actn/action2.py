@@ -116,12 +116,11 @@ def mutate(old_traj):
 
 def simulate():
     # hyper/meta trajectory
-    hyper_traj = []
+    hyper_traj = []  # less frequent
+    seqoa=[]  # for all accepted
 
     PER_HOW_MANY = 500*2
 
-    seqoa=[]
-    seqoa_i=[]
     accepted_count = 0
     currentTraj = Trajectory(initial_path_xy=generate_initial_path(ntimesteps) )
     clamp(currentTraj)
@@ -145,6 +144,10 @@ def simulate():
         if da > 0: # Got worse (increased). We want the least action
             continue
 
+        ######################
+        # Accepted trajectory
+        ######################
+
         #Temp = 100.0
         #probr = math.exp( -abs(da)/Temp )
         #print probr
@@ -152,9 +155,7 @@ def simulate():
         # accept the mutation
         currentTraj = cand
 
-        seqoa.append((i,action_new))
-        seqoa_i.append(i)
-
+        seqoa.append((i, action_new))
         accepted_count += 1
         if accepted_count % PER_HOW_MANY == 0:
             print( currentTraj.get_action() )
@@ -183,7 +184,7 @@ def live_fig_update(currentTraj, i):
     print( currentTraj.get_action() )
     pl.show(block=False)
 
-def overall_plot(currentTraj, hyper_traj):
+def overall_plot(bestTraj, hyper_traj):
     ############
     # Plot overall indicators of trajectory of learning
     ############
@@ -198,7 +199,7 @@ def overall_plot(currentTraj, hyper_traj):
 
     fig, (ax1, ax2) = pl.subplots(1, 2)
     fig2(ax2, ta, Dτ)
-    fig1(ax1,   currentTraj, hyper_traj)
+    fig1(ax1,   bestTraj, hyper_traj)
 
 def fig2(ax2, ta, Dτ):
     seqoa_2 = np.array(seqoa)
@@ -241,11 +242,11 @@ def fig2_annot(aa, hhh):
         ax2b.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(0.2))
 
 
-def fig1(ax1, currentTraj, hyper_traj):
+def fig1(ax1, bestTraj, hyper_traj):
     # Plot certain streaks in the overall trajectory of learning
     xyz = np.concatenate(hyper_traj,axis=0)
     print(xyz.shape) #(:, 2, ntimesteps)
-    ax1.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'k')
+    ax1.plot(bestTraj.xy[X_AXIS,:], bestTraj.xy[Y_AXIS,:], 'k')
     ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
     # pl.hold(true)
     for ii in [3,5]: # out of ntimesteps
@@ -254,8 +255,8 @@ def fig1(ax1, currentTraj, hyper_traj):
         ax1.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.--')
         ax1.set(xlabel='x', ylabel='y') #pl.gca().set
 
-currentTraj, seqoa, hyper_traj = simulate()
-overall_plot(currentTraj, hyper_traj)
+bestTraj, seqoa, hyper_traj = simulate()
+overall_plot(bestTraj, hyper_traj)
 
 print('Finished. Close the plot. Press Q')
 pl.show()
