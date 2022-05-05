@@ -2,11 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-actn: Simple Action Minimizer
-
-Based on the concept of "Action" defined on "trajectories".
-Action = ∫ Lagragian dt, defined by Joseph-Louis Lagrange
-is able to describe classical mechanics.
+actn: Simple Action Minimizer: Experiment 2
 
 This script finds a tajectory that minimises the Action, given the start and end points.
 
@@ -19,7 +15,7 @@ It uses a crude and naïve/rudimentary/primitive representation of functionals.
 import numpy as np
 import math
 import matplotlib.pylab as pl
-import matplotlib
+#import matplotlib
 
 _KG, _Gr = 1.0, 0.001
 _CM = 0.01
@@ -27,7 +23,7 @@ _CM = 0.01
 #target_x_meters = 15.0 #* 2 #* 100.0 #    * 5.0 # *100
 #target_y_meters = 1.0 #* 30
 target_xy_meters = np.array([15.0, 1.0])
-target_t_sec = 0.1  # 100 msec?!
+target_t_sec = 0.1  # 100 msec?!  Also corresponds to the index [-1] of clamp
 ntimesteps = 10*2
 # segments of trajectory (nsteps = nsegments of time), discritisation segments of timespace trajectory
 
@@ -88,6 +84,8 @@ def mutate(old_traj):
     cand.xy[:,j] = cand.xy[:,j] + uxy * PERTURB[:]
     # todo: visualise (K,T), subtract (K'-K, T'-T)
 
+    clamp(cand)
+
     return cand
 
 #def accept_mutation(cand, old_traj):
@@ -106,8 +104,24 @@ def live_fig_update(currentTraj, i):
     print( currentTraj.get_action() )
     pl.show(block=False)
 
+def clamp1(traj):
+    # clamp end points
+    traj.xy[:,0] = (0.0, 0.0)
+    traj.xy[:,-1] = target_xy_meters
+    mi = int(traj.xy.shape[1]/2)
+    traj.xy[:,mi] = (7.5, -1.0)
+    #Also: get a bit closer to this
+
+def clamp(traj):
+    traj2 = Trajectory(traj)
+    clamp1(traj2)
+    # get a bit closer to traj2
+    alpha = 0.999
+    traj.xy = traj.xy * (1-alpha) + traj2.xy * alpha
+
 def rand_path(ntimesteps):
-    return np.cumsum(np.random.rand(2,ntimesteps)/(float(ntimesteps) * 0.5), axis=S_DIM)
+    # not very sensitive to initial conditions
+    return np.cumsum((np.random.randn(2,ntimesteps)+0.5)/(float(ntimesteps) * 0.5), axis=S_DIM) * target_xy_meters[:,None] # xy
 
 # hyper/meta trajectory
 hyper_traj = []
@@ -117,16 +131,13 @@ PER_HOW_MANY = 500*2
 seqoa=[]
 seqoa_i=[]
 accepted_count = 0
-currentTraj = Trajectory(initial_path_xy=rand_path(ntimesteps) * target_xy_meters[:,None])
-# clamp end points
-currentTraj.xy[:,0] = (0.0, 0.0)
-currentTraj.xy[:,-1] = target_xy_meters
+currentTraj = Trajectory(initial_path_xy=rand_path(ntimesteps) )
+clamp(currentTraj)
 
-MAX_COUNT = int(210000/50)
-# MAX_COUNT =10000 # more brief, for debug
+MAX_COUNT = int(210000)   # MAX_COUNT = 10000 # more brief, for debug
 
 for i in range(0,MAX_COUNT):
-    sometimes = i % PER_HOW_MANY == 0
+    sometimes = (i % PER_HOW_MANY == 0) or (i < PER_HOW_MANY and i % 20 == 0)
     if sometimes:
         hyper_traj.append((currentTraj.xy[:,:])[None,:,:])
         live_fig_update(currentTraj, i)
@@ -203,8 +214,8 @@ if False:
   ax2.set_in_layout(False)
   # https://matplotlib.org/3.5.0/api/transformations.html#matplotlib.transforms.Transform
 
-##ax2.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(5))
-ax2b.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(0.2))
+  ##ax2.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(5))
+  ax2b.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(0.2))
 
 
 # Plot certain streaks in the overall trajectory of learning
