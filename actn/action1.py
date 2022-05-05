@@ -28,8 +28,7 @@ _CM = 0.01
 target_xy_meters = np.array([15.0, 1.0])
 target_t_sec = 0.1  # 100 msec?!
 ntimesteps = 10*2
-#ntimesteps = 20  # todo: not stable / converging to the same value when ntimesteps (discritisation segments of timespace trajectory) is increased
-#ntimesteps = 10+15 # segments of trajectory (nsteps = nsegments of time)
+# segments of trajectory (nsteps = nsegments of time), discritisation segments of timespace trajectory
 
 (X_AXIS, Y_AXIS) = (0, 1)
 (XY_DIM, S_DIM) = (0, 1)
@@ -178,13 +177,23 @@ fig, (ax1, ax2) = pl.subplots(1, 2)
 
 Dτ=1.0 # not physical time, # 0.01
 
-ax2.plot(ta,np.array(seqoa),'r', label='A')
-ax2.plot(ta[1:],np.diff(np.array(seqoa))*1000, 'k.', markersize=0.2, label='ΔA')
-ax2.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/Dτ*1000, 'b', label='dA')  # dx/dt
+h0, = ax2.plot(ta,np.array(seqoa),'r', label='A')
+ax2b=ax2.twinx()
+h1, = ax2b.plot(ta[1:],np.diff(np.array(seqoa)), 'k.', markersize=0.2, label='ΔA')
+h2, = ax2b.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/Dτ, 'b', label='dA')  # dx/dt
 ax2.set_xscale('log')
-ax2.set(xlabel='τ', ylabel=None); ax2.legend() # ax2.set_title('τ,A') # Action
-ax2.set_ylim((-5000, 500))
-
+#ax2.set(xlabel='τ (epoc)', ylabel='A'); ax2.legend() # ax2.set_title('τ,A') # Action
+#ax2b.set_ylim((-5000, 3500)); ax2b.set(ylabel='ΔA'); ax2b.legend()
+ax2.set(xlabel='τ (epoc)');
+ax2.set_ylabel ('A',  color='r')
+ax2.yaxis.label.set_color(h0.get_color())
+ax2b.set_ylabel('ΔA', color='b')
+ax2b.yaxis.label.set_color(h2.get_color())
+ax2.legend(handles=[h0, h1, h2], loc='lower center')
+#ax2b.spines.right.set_position(("outward", -10))
+ax2.spines.left.set_position(("outward", -20))
+ax2.spines.left.set_color('r')
+ax2b.spines.right.set_color('b')
 
 # Plot certain streaks in the overall trajectory of learning
 xyz = np.concatenate(hyper_traj,axis=0)
