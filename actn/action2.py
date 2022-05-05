@@ -25,6 +25,8 @@ ntimesteps = 10*2
 # s = (time)steps
 
 
+user_mouse_fixation = []
+
 #target_x_meters = 15.0 #* 2 #* 100.0 #    * 5.0 # *100
 #target_y_meters = 1.0 #* 30
 target_xy_meters = np.array([15.0, 1.0])
@@ -38,6 +40,11 @@ def clamp(traj):
     # a clammp constrsaint is also equivalent to an implicit force
     mi = int(traj.xy.shape[1]/2)
     traj.xy[:,mi] = (7.5, -1.0)
+
+    # does not work properly
+    if len(user_mouse_fixation) != 0:
+        traj.xy[:,-1] = user_mouse_fixation
+
 
 def generate_initial_path(ntimesteps):
     # not very sensitive to initial conditions
@@ -158,7 +165,7 @@ def simulate():
         seqoa.append((i, action_new))
         accepted_count += 1
         if accepted_count % PER_HOW_MANY == 0:
-            print( currentTraj.get_action() )
+            print( 'Action=', currentTraj.get_action() )
 
     return currentTraj, seqoa, hyper_traj
 
@@ -175,15 +182,16 @@ def live_fig_update(currentTraj, i):
     handle = pl.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'b') #, 'color',(0.3,0.3,0.3) )
     handle[0].set_linewidth(0.2)
     pl.gca().set_aspect('equal')
-    print(i)
 
     def mouse_move(event):
-        currentTraj.xy[:,-1] = [event.xdata, event.ydata]
+        #currentTraj.xy[:,-1]
+        if event.xdata is not None and event.ydata is not None:
+            user_mouse_fixation[:] = [event.xdata, event.ydata]
 
     pl.connect('motion_notify_event', mouse_move)
     #pl.draw()
     pl.pause(0.001)
-    print( currentTraj.get_action() )
+    print( 'action:', currentTraj.get_action(), '  iteration', i)
     pl.show(block=False)
 
 def overall_plot(bestTraj, hyper_traj):
