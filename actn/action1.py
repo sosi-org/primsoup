@@ -26,7 +26,7 @@ _CM = 0.01
 #target_x_meters = 15.0 #* 2 #* 100.0 #    * 5.0 # *100
 #target_y_meters = 1.0 #* 30
 target_xy_meters = np.array([15.0, 1.0])
-target_t_sec = 0.1  # 100 msec?!
+target_t_sec = 0.1  # 100 msec?!  # Also corresponds to the index [-1] of clamp
 ntimesteps = 10*2
 # segments of trajectory (nsteps = nsegments of time), discritisation segments of timespace trajectory
 
@@ -121,11 +121,10 @@ currentTraj = Trajectory(initial_path_xy=rand_path(ntimesteps) * target_xy_meter
 currentTraj.xy[:,0] = (0.0, 0.0)
 currentTraj.xy[:,-1] = target_xy_meters
 
-MAX_COUNT = int(210000)
-# MAX_COUNT =10000 # more brief, for debug
+MAX_COUNT = int(210000)   # MAX_COUNT = 10000 # more brief, for debug
 
 for i in range(0,MAX_COUNT):
-    sometimes = i % PER_HOW_MANY == 0
+    sometimes = (i % PER_HOW_MANY == 0)
     if sometimes:
         hyper_traj.append((currentTraj.xy[:,:])[None,:,:])
         live_fig_update(currentTraj, i)
