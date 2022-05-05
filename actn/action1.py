@@ -183,12 +183,12 @@ h1, = ax2b.plot(ta[1:],np.diff(np.array(seqoa)), 'k.', markersize=0.2, label='Δ
 h2, = ax2b.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/Dτ, 'b', label='dA')  # dx/dt
 ax2.set_xscale('log')
 #ax2.set(xlabel='τ (epoc)', ylabel='A'); ax2.legend() # ax2.set_title('τ,A') # Action
-#ax2b.set_ylim((-5000, 3500)); ax2b.set(ylabel='ΔA'); ax2b.legend()
+ax2b.set_ylim((-8.000, 0.2))
 ax2.set(xlabel='τ (epoc)');
 ax2.set_ylabel ('A',  color='r')
-ax2.yaxis.label.set_color(h0.get_color())
-ax2b.set_ylabel('ΔA', color='b')
-ax2b.yaxis.label.set_color(h2.get_color())
+#ax2.yaxis.label.set_color(h0.get_color())
+ax2b.set_ylabel('ΔA', color='b') # ax2b.set(ylabel='ΔA')
+#ax2b.yaxis.label.set_color(h2.get_color())
 ax2.legend(handles=[h0, h1, h2], loc='lower center')
 #ax2b.spines.right.set_position(("outward", -10))
 ax2.spines.left.set_position(("outward", -20))
