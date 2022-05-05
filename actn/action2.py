@@ -183,60 +183,76 @@ def filter1(a, alpha):
         b[i] = slowa = slowa * (1.0-alpha) + a[i] * (alpha)
     return b
 
-############
-# Plot overall indicators of trajectory of learning
-############
+def overall_plot():
+    ############
+    # Plot overall indicators of trajectory of learning
+    ############
 
-# What is this figure showing?
-# ta: not the real time, not the s: the learning time! τ
-# x-axis = Abscissa = slow time: τ
-# # not physical time
-ta=np.arange(0.0,float(len(seqoa)))/float(len(seqoa))
+    # What is this figure showing?
+    # ta: not the real time, not the s: the learning time! τ
+    # x-axis = Abscissa = slow time: τ
+    # # not physical time
+    ta=np.arange(0.0,float(len(seqoa)))/float(len(seqoa))
 
-fig, (ax1, ax2) = pl.subplots(1, 2)
+    Dτ=1.0 # not physical time, # 0.01
 
-Dτ=1.0 # not physical time, # 0.01
+    fig, (ax1, ax2) = pl.subplots(1, 2)
+    fig2(ax2)
+    fig1(ax1)
 
-h0, = ax2.plot(ta,np.array(seqoa),'r', label='A')
-ax2b=ax2.twinx()
-h1, = ax2b.plot(ta[1:],np.diff(np.array(seqoa)), 'k.', markersize=0.2, label='ΔA')
-h2, = ax2b.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/Dτ, 'b', label='dA')  # dx/dt
-ax2.set_xscale('log')
-#ax2.set(xlabel='τ (epoc)', ylabel='A'); ax2.legend() # ax2.set_title('τ,A') # Action
-ax2b.set_ylim((-8.000, 0.2))
-ax2.set(xlabel='τ (epoc)');
-ax2.set_ylabel ('A = Action',  color='r')
-#ax2.yaxis.label.set_color(h0.get_color())
-ax2b.set_ylabel('ΔA', color='b') # ax2b.set(ylabel='ΔA')
-#ax2b.yaxis.label.set_color(h2.get_color())
-ax2.legend(handles=[h0, h1, h2], loc='lower center')
-#ax2b.spines.right.set_position(("outward", -10))
-ax2.spines.left.set_position(("outward", -30))
-ax2.spines.left.set_color('r')
-ax2b.spines.right.set_color('b')
-if False:
-  #ax2.yticks(rotation = 45)
-  ax2.spines.left.set_in_layout(True)
-   # see https://matplotlib.org/stable/api/spines_api.html
-  #ax2.spines.set_in_layout(True)
-  ax2.set_in_layout(False)
-  # https://matplotlib.org/3.5.0/api/transformations.html#matplotlib.transforms.Transform
+def fig2(ax2):
+    h0, = ax2.plot(ta,np.array(seqoa),'r', label='A')
+    ax2b=ax2.twinx()
+    h1, = ax2b.plot(ta[1:],np.diff(np.array(seqoa)), 'k.', markersize=0.2, label='ΔA')
+    h2, = ax2b.plot(ta[1:],np.diff(filter1(seqoa, 0.01))/Dτ, 'b', label='dA')  # dx/dt
 
-  ##ax2.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(5))
-  ax2b.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(0.2))
+    fig2_annot([ax2, ax2b], [h0,h1,h2])
 
 
-# Plot certain streaks in the overall trajectory of learning
-xyz = np.concatenate(hyper_traj,axis=0)
-print(xyz.shape) #(:, 2, ntimesteps)
-ax1.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'k')
-ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
-# pl.hold(true)
-for ii in [3,5]: # out of ntimesteps
-    ax1.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
-    ax1.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.4)
-    ax1.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.--')
-    ax1.set(xlabel='x', ylabel='y') #pl.gca().set
+def fig2_annot(aa, hhh):
+    [ax2, ax2b] = aa
+    [h0,h1,h2] = hhh
+
+    ax2.set_xscale('log')
+    #ax2.set(xlabel='τ (epoc)', ylabel='A'); ax2.legend() # ax2.set_title('τ,A') # Action
+    ax2b.set_ylim((-8.000, 0.2))
+    ax2.set(xlabel='τ (epoc)');
+    ax2.set_ylabel ('A = Action',  color='r')
+    #ax2.yaxis.label.set_color(h0.get_color())
+    ax2b.set_ylabel('ΔA', color='b') # ax2b.set(ylabel='ΔA')
+    #ax2b.yaxis.label.set_color(h2.get_color())
+    ax2.legend(handles=[h0, h1, h2], loc='lower center')
+    #ax2b.spines.right.set_position(("outward", -10))
+    ax2.spines.left.set_position(("outward", -30))
+    ax2.spines.left.set_color('r')
+    ax2b.spines.right.set_color('b')
+    if False:
+        #ax2.yticks(rotation = 45)
+        ax2.spines.left.set_in_layout(True)
+         # see https://matplotlib.org/stable/api/spines_api.html
+        #ax2.spines.set_in_layout(True)
+        ax2.set_in_layout(False)
+        # https://matplotlib.org/3.5.0/api/transformations.html#matplotlib.transforms.Transform
+
+        ##ax2.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(5))
+        ax2b.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(0.2))
+
+
+def fig1(ax1):
+    # Plot certain streaks in the overall trajectory of learning
+    xyz = np.concatenate(hyper_traj,axis=0)
+    print(xyz.shape) #(:, 2, ntimesteps)
+    ax1.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'k')
+    ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
+    # pl.hold(true)
+    for ii in [3,5]: # out of ntimesteps
+        ax1.plot(np.transpose(xyz[:,0,:]), np.transpose(xyz[:,1,:]), 'b-', linewidth=0.2)
+        ax1.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.4)
+        ax1.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.--')
+        ax1.set(xlabel='x', ylabel='y') #pl.gca().set
+
+
+overall_plot()
 
 print('Finished. Close the plot. Press Q')
 pl.show()
