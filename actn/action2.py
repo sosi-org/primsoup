@@ -107,6 +107,20 @@ class Trajectory:
 
             Somehow $T$ needs to also take acceleration into account.
             This formula $T=Ek=0.5mv^2$ is somehow in absence of external (injected) force.
+
+            Wikipedia says "no single expression for all physical systems".
+            Is L for closed systems? (Exchange of forces between particles)
+            However, if an external force is applied, the system is no longer closed.
+            Is such cases, can we say Lagrangian doe snot exist?
+            Perhaps the L=T-V is for free moving, when noexternal lforce is applied?
+
+            If such L (for a noon-closed system) exists, a subsystem has L.
+            For the same reasoon/logical symmetry, the other part of the system aalso has its own L'.
+            What are the L of two interacting systems?
+            Howe are they related?
+            If a closed system is split into two parts two Ls will emerge.
+            How an L can be divided into two L1,L2?
+
             """
         else:
             self.xy = trajc.xy.copy()
