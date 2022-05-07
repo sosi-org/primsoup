@@ -35,6 +35,12 @@ target_t_sec = 0.1 *40 # 100 msec?!  Also corresponds to the index [-1] of clamp
 def clamp(traj):
     # clamp end points
     traj.xy[:,0] = (0.0, 0.0)
+    dt = traj.dt
+    print(traj.xy[:,0].shape, np.array((1.0, 1.0)).shape, '**')
+    # velocity xy
+    vxy = np.array((-1.0, 1.0))
+    traj.xy[:,1] = traj.xy[:,0] + vxy * dt
+
     traj.xy[:,-1] = target_xy_meters
 
     # a clammp constrsaint is also equivalent to an implicit force
@@ -71,6 +77,31 @@ class Trajectory:
             self.xy = initial_path_xy.copy()
             self.m = 1.0 * _KG
             self.dt = target_t_sec / float(ntimesteps)
+            """ Even $dt$ does not have to be uniform.
+            It can be any $t(s)$.
+            However, the integration is A = ∫ L dt
+            In terms of s: A = ∫ L(s) dt(s)/ds ds.
+            In terms of numerical computing, an array of `t` can be used,
+            and can be stretched during the "evoluton" of trajectory (over τ ! homotopy?).
+            In terms of Physics, time can be an emergent: read out from the trajectory.
+            The trajectory itself is (transcended to be) in terms of (a in space of) s,τ.
+            t(s,τ),
+            t(s;τ), x(s;τ), y(s;τ), px(s;τ), py(s;τ)
+            [t,x,y,px,py](s;τ)
+
+            Why we don't store (x,px,py)? We store xy.
+            The t, we know: t is (implcitly) simply: t(s) = s dt, s=0,1,...,ntimesteps.
+            > Side note: `ntimesteps` is steps of `s`, not "time".
+            But why don't we save (px,py)?
+            Although we can extract it from the `xy` array,
+            but in principle, it should have been "stored" separately.
+            but the story is different:
+            the correct interpretation is that `xy` and `(px,py)` are tightly constrained.
+            Compelled to follow eachother.
+            That's why we ... (?).
+            However, it failed. A continuity constriant is somehow in place.
+            Equivalent to what strength of force?
+            """
         else:
             self.xy = trajc.xy.copy()
             (self.m, self.dt) = (trajc.m, trajc.dt)
