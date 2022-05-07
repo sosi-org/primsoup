@@ -121,6 +121,12 @@ class Trajectory:
             If a closed system is split into two parts two Ls will emerge.
             How an L can be divided into two L1,L2?
 
+            It seems, L=L1+L2. (the Ti-Vi s add up).
+
+            Wow ""The potential energy of the system reflects the energy of interaction between the particles, i.e. how much energy any one particle will have due to all the others and other external influences.".
+            Yes, V from gravity, is from external force.
+            That's the only force!
+
             """
         else:
             self.xy = trajc.xy.copy()
