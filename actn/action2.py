@@ -36,14 +36,15 @@ def clamp(traj):
     # clamp end points
     traj.xy[:,0] = (0.0, 0.0)
     dt = traj.dt
-    print(traj.xy[:,0].shape, np.array((1.0, 1.0)).shape, '**')
+    # print(traj.xy[:,0].shape, np.array((1.0, 1.0)).shape, '**')
+    # (2,) == (2,)
     # velocity xy
     vxy = np.array((-1.0, 1.0))
     traj.xy[:,1] = traj.xy[:,0] + vxy * dt
 
     traj.xy[:,-1] = target_xy_meters
 
-    # a clammp constrsaint is also equivalent to an implicit force
+    # a clamp constrsaint is also equivalent to an implicit force
     mi = int(traj.xy.shape[1]/2)
     traj.xy[:,mi] = (7.5, -1.0)
 
@@ -101,6 +102,11 @@ class Trajectory:
             That's why we ... (?).
             However, it failed. A continuity constriant is somehow in place.
             Equivalent to what strength of force?
+
+            The acceleration. The acceleration should be limited (constrined) now.
+
+            Somehow $K$ needs to also take acceleration into account.
+            This formula $K=Ek=0.5mv^2$ is somehow in absence of external (injected) force
             """
         else:
             self.xy = trajc.xy.copy()
@@ -114,6 +120,8 @@ class Trajectory:
     def get_kin(self):
         v = np.diff(self.xy, axis=S_DIM) / self.dt
         mv2 = np.sum(0.5 * self.m * v * v, axis=XY_DIM)
+        # Somehow needs to also take acceleration into account.
+        # This formula `Ek=0.5mv^2`` is somehow in absence of external (injected) force
         return np.sum(mv2) * self.dt  # integral =  ∫ (0.5 mv^2) dt
 
     def get_action(self):

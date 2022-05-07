@@ -92,4 +92,6 @@ source ./p3-for-me/bin/activate
 
 python --version
 
-python action1.py
+# python action1.py
+
+python action2.py
