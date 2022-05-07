@@ -105,8 +105,8 @@ class Trajectory:
 
             The acceleration. The acceleration should be limited (constrined) now.
 
-            Somehow $K$ needs to also take acceleration into account.
-            This formula $K=Ek=0.5mv^2$ is somehow in absence of external (injected) force
+            Somehow $T$ needs to also take acceleration into account.
+            This formula $T=Ek=0.5mv^2$ is somehow in absence of external (injected) force.
             """
         else:
             self.xy = trajc.xy.copy()
@@ -152,8 +152,8 @@ def mutate(old_traj, actr):
     uxy = (np.random.rand(2)*2-1.0)     # Normal(0,σ)
     #uxy = (np.random.randn(2))         # uniform [-1,1] * σ
     cand.xy[:,j] = cand.xy[:,j] + uxy * PERTURB[:]
-    # todo: visualise (K,T), subtract (K'-K, T'-T)
-
+    # todo: visualise (T,V), subtract (T'-T, V'-V)
+    # Instead of the $(K,T)$ convension (as in $L = K-T$), I used (K,T).
     clamp(cand)
 
     return cand
