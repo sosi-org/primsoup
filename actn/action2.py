@@ -127,6 +127,16 @@ class Trajectory:
             Yes, V from gravity, is from external force.
             That's the only force!
 
+            For conservative "forces", V is a funiton of positions only: $V(x)$.
+            However, for "those non-conservative forces", the velocities will appear also: $V(x,p)$.
+            V = field? Potential of (e.g. Electrical) field?
+
+            wp: In relativistic systems (special and general), also for "dissipative forces", the form of L will change.
+
+            Todo: The relaation between L of interacting systems.
+
+            "holonomic constraints": $c(x,t)=0$.
+            then ...?
             """
         else:
             self.xy = trajc.xy.copy()
