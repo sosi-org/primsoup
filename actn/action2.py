@@ -202,7 +202,8 @@ def mutate(old_traj, actr):
 def simulate():
     # hyper/meta trajectory
     hyper_traj = []  # less frequent
-    seqoa=[]  # for all accepted
+    trend = { }
+    trend['seqoa'] = []  # for all accepted
 
     PER_HOW_MANY = 500*2
 
@@ -240,12 +241,12 @@ def simulate():
         # accept the mutation
         currentTraj = cand
 
-        seqoa.append((i, action_new))
+        trend['seqoa'].append((i, action_new))
         accepted_count += 1
         if accepted_count % PER_HOW_MANY == 0:
             print( 'Action=', currentTraj.get_action() )
 
-    return currentTraj, seqoa, hyper_traj
+    return currentTraj, hyper_traj, trend
 
 def filter1(a, alpha):
     a = np.array(a); assert len(a.shape) == 1
@@ -274,7 +275,7 @@ def live_fig_update(currentTraj, i):
     print( 'action:', currentTraj.get_action(), '  iteration', i)
     pl.show(block=False)
 
-def overall_plot(bestTraj, hyper_traj):
+def overall_plot(bestTraj, hyper_traj, trend):
     ############
     # Plot overall indicators of trajectory of learning
     ############
@@ -283,15 +284,16 @@ def overall_plot(bestTraj, hyper_traj):
     # ta: not the real time, not the s: the learning time! τ
     # x-axis = Abscissa = slow time: τ
     # # not physical time
-    ta=np.arange(0.0,float(len(seqoa)))/float(len(seqoa))
+    nτ = len(trend['seqoa'])
+    ta=np.arange(0.0,float(nτ))/float(nτ)
 
     Dτ=1.0 # not physical time, # 0.01
 
     fig, (ax1, ax2) = pl.subplots(1, 2)
-    fig2(ax2, ta, Dτ)
+    fig2(ax2, ta, Dτ, trend['seqoa'])
     fig1(ax1,   bestTraj, hyper_traj)
 
-def fig2(ax2, ta, Dτ):
+def fig2(ax2, ta, Dτ, seqoa):
     seqoa_2 = np.array(seqoa)
     EPOC_I, ACTION_I = (0, 1)
     # print(seqoa_2.shape) # (2442, 2)
@@ -345,8 +347,8 @@ def fig1(ax1, bestTraj, hyper_traj):
         ax1.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.--')
         ax1.set(xlabel='x', ylabel='y') #pl.gca().set
 
-bestTraj, seqoa, hyper_traj = simulate()
-overall_plot(bestTraj, hyper_traj)
+bestTraj, hyper_traj, trend  = simulate()
+overall_plot(bestTraj, hyper_traj, trend)
 
 print('Finished. Close the plot. Press Q')
 pl.show()
