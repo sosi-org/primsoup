@@ -163,7 +163,8 @@ class Trajectory:
         return np.sum(mv2) * self.dt  # integral =  ∫ (0.5 mv^2) dt
 
     def get_action(self):
-        return self.get_kin() - self.get_pot()
+        T,V = self.get_kin(), self.get_pot()
+        return T - V, T, V
 
 def mutate(old_traj, actr):
     # Candidate trajectory
@@ -204,6 +205,8 @@ def simulate():
     hyper_traj = []  # less frequent
     trend = { }
     trend['seqoa'] = []  # for all accepted
+    trend['seqoK'] = []  # for all accepted
+    trend['seqoV'] = []  # for all accepted
 
     PER_HOW_MANY = 500*2
 
@@ -225,8 +228,9 @@ def simulate():
             continue # skip
 
         # Acceptance criteria
-        action_new = cand.get_action()
-        da = action_new - currentTraj.get_action()
+        action_new = cand.get_action()[0]
+        cA, cK, cV = currentTraj.get_action()
+        da = action_new - cA
         if da > 0: # Got worse (increased). We want the least action
             continue
 
@@ -240,11 +244,16 @@ def simulate():
 
         # accept the mutation
         currentTraj = cand
+        # bug: th following line was missing:
+        cA, cK, cV = currentTraj.get_action()
 
-        trend['seqoa'].append((i, action_new))
+        trend['seqoa'].append((i, cA))
+        trend['seqoK'].append((i, cK))
+        trend['seqoV'].append((i, cV))
+
         accepted_count += 1
         if accepted_count % PER_HOW_MANY == 0:
-            print( 'Action=', currentTraj.get_action() )
+            print( 'Action,K,V=', cA )
 
     return currentTraj, hyper_traj, trend
 
@@ -290,25 +299,30 @@ def overall_plot(bestTraj, hyper_traj, trend):
     Dτ=1.0 # not physical time, # 0.01
 
     fig, (ax1, ax2) = pl.subplots(1, 2)
-    fig2(ax2, τa, Dτ, trend['seqoa'])
+    fig2(ax2, τa, Dτ, trend)
     fig1(ax1,   bestTraj, hyper_traj)
 
-def fig2(ax2, τa, Dτ, seqoa):
+def fig2(ax2, τa, Dτ, trend):
+    seqoa = trend['seqoa']
     seqoa_2 = np.array(seqoa)
+    seqoK_2 = np.array(trend['seqoK'])
+    seqoV_2 = np.array(trend['seqoV'])
     EPOC_I, ACTION_I = (0, 1)
     # print(seqoa_2.shape) # (2442, 2)
     h0, = ax2.plot(τa, seqoa_2[:,ACTION_I],'r', label='A')
+    h0A=h0
+    h0K, = ax2.plot(τa, seqoK_2[:,ACTION_I],'g', label='K')
+    h0V, = ax2.plot(τa, seqoV_2[:,ACTION_I],'m', label='V')
     ax2b = ax2.twinx()
     h1, = ax2b.plot(τa[1:], np.diff(seqoa_2[:,ACTION_I]), 'k.', markersize=0.2, label='ΔA')
     h2, = ax2b.plot(τa[1:], np.diff(filter1(seqoa_2[:,ACTION_I], 0.01))/Dτ, 'b', label='dA')  # dx/dt
 
-    fig2_annot([ax2, ax2b], [h0,h1,h2])
+    fig2_annot([ax2, ax2b], [[h0A,h0K,h0V],h1,h2])
 
 
 def fig2_annot(aa, hhh):
     [ax2, ax2b] = aa
-    [h0,h1,h2] = hhh
-
+    [[h0A,h0K,h0V], h1,h2] = hhh
     ax2.set_xscale('log')
     #ax2.set(xlabel='τ (epoc)', ylabel='A'); ax2.legend() # ax2.set_title('τ,A') # Action
     ax2b.set_ylim((-8.000, 0.2))
@@ -317,7 +331,7 @@ def fig2_annot(aa, hhh):
     #ax2.yaxis.label.set_color(h0.get_color())
     ax2b.set_ylabel('ΔA', color='b') # ax2b.set(ylabel='ΔA')
     #ax2b.yaxis.label.set_color(h2.get_color())
-    ax2.legend(handles=[h0, h1, h2], loc='lower center')
+    ax2.legend(handles=[h0A, h0K, h0V, h1, h2], loc='lower center')
     #ax2b.spines.right.set_position(("outward", -10))
     ax2.spines.left.set_position(("outward", -30))
     ax2.spines.left.set_color('r')
