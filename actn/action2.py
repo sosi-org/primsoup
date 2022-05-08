@@ -228,10 +228,10 @@ def simulate():
             continue # skip
 
         # Acceptance criteria
-        action_new = cand.get_action()[0]
+        action_new, newK, newV = cand.get_action()
         cA, cK, cV = currentTraj.get_action()
         da = action_new - cA
-        if da > 0: # Got worse (increased). We want the least action
+        if da >= 0: # Got worse (increased). We want the least action
             continue
 
         ######################
@@ -244,15 +244,15 @@ def simulate():
 
         # accept the mutation
         currentTraj = cand
-        cA, cK, cV = currentTraj.get_action()
+        #cA, cK, cV = currentTraj.get_action()
 
-        trend['seqoA'].append((i, cA, cK, cV))
-        trend['seqoK'].append((i, cK))
-        trend['seqoV'].append((i, cV))
+        trend['seqoA'].append((i, action_new, newK, newV))
+        trend['seqoK'].append((i, newK))
+        trend['seqoV'].append((i, newV))
 
         accepted_count += 1
         if accepted_count % PER_HOW_MANY == 0:
-            print( 'Action,K,V=', cA )
+            print( 'Action,K,V=', action_new,newK,newV )
 
     return currentTraj, hyper_traj, trend
 
@@ -318,10 +318,15 @@ def fig2(ax2, τa_, Dτ, trend):
     ax2.plot(τa__, seqoV_2[:,1],'c:', label='V')
     """
     ax2b = ax2.twinx()
-    h1, = ax2b.plot(τa[1:], np.diff(seqoA_2[:,I_ACTION]), 'k.', markersize=0.2, label='ΔA')
-    h2, = ax2b.plot(τa[1:], np.diff(filter1(seqoA_2[:,I_ACTION], 0.01)), 'b', label='dA')  # dx/dt
+    h1, = ax2b.plot(τa[1:], -np.diff(seqoA_2[:,I_ACTION]), 'k.', markersize=0.2, label='ΔA')
+    h2, = ax2b.plot(τa[1:], -np.diff(filter1(seqoA_2[:,I_ACTION], 0.01)), 'b', label='dA')  # dx/dt
 
     fig2_annot([ax2, ax2b], [[h0A,h0K,h0V],h1,h2])
+
+    pl.figure
+    pl.yscale('log')
+    h1, = ax2b.plot(τa[1:], -np.diff(seqoA_2[:,I_ACTION]), 'k.', markersize=0.2, label='ΔA')
+    h2, = ax2b.plot(τa[1:], -np.diff(filter1(seqoA_2[:,I_ACTION], 0.01)), 'b', label='dA')  # dx/dt
 
 
 def fig2_annot(aa, hhh):
@@ -329,7 +334,8 @@ def fig2_annot(aa, hhh):
     [[h0A,h0K,h0V], h1,h2] = hhh
     ax2.set_xscale('log')
     #ax2.set(xlabel='τ (epoc)', ylabel='A'); ax2.legend() # ax2.set_title('τ,A') # Action
-    ax2b.set_ylim((-2.000, 0.2))
+    #ax2b.set_ylim((-2.000, 0.2))
+    ax2b.set_yscale('symlog')
     ax2.set(xlabel='τ (epoc)');
     ax2.set_ylabel ('A = Action',  color='r')
     #ax2.yaxis.label.set_color(h0A.get_color())

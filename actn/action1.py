@@ -137,7 +137,7 @@ for i in range(0,MAX_COUNT):
     # Acceptance criteria
     action_new = cand.get_action()
     da = action_new - currentTraj.get_action()
-    if da > 0: # Got worse (increased). We want the least action
+    if da >= 0: # Got worse (increased). We want the least action
         continue
 
     #Temp = 100.0
