@@ -204,7 +204,7 @@ def simulate():
     # hyper/meta trajectory
     hyper_traj = []  # less frequent
     trend = { }
-    trend['seqoa'] = []  # for all accepted
+    trend['seqoA'] = []  # for all accepted
     trend['seqoK'] = []  # for all accepted
     trend['seqoV'] = []  # for all accepted
 
@@ -244,10 +244,9 @@ def simulate():
 
         # accept the mutation
         currentTraj = cand
-        # bug: th following line was missing:
         cA, cK, cV = currentTraj.get_action()
 
-        trend['seqoa'].append((i, cA))
+        trend['seqoA'].append((i, cA, cK, cV))
         trend['seqoK'].append((i, cK))
         trend['seqoV'].append((i, cV))
 
@@ -293,29 +292,31 @@ def overall_plot(bestTraj, hyper_traj, trend):
     # τa: not the real time, not the s: the learning time! τ
     # x-axis = Abscissa = slow time: τ
     # # not physical time
-    nτ = len(trend['seqoa'])
+    nτ = len(trend['seqoA'])
     τa = np.arange(0.0,float(nτ))/float(nτ)
 
-    Dτ=1.0 # not physical time, # 0.01
+    # Dτ=1.0 # not physical time, # 0.01
+    Dτ=1.0/float(nτ)
 
     fig, (ax1, ax2) = pl.subplots(1, 2)
     fig2(ax2, τa, Dτ, trend)
     fig1(ax1,   bestTraj, hyper_traj)
 
-def fig2(ax2, τa, Dτ, trend):
-    seqoa = trend['seqoa']
-    seqoa_2 = np.array(seqoa)
+def fig2(ax2, τa_, Dτ, trend):
+    seqoA_2 = np.array(trend['seqoA'])  # shape=(,4)
     seqoK_2 = np.array(trend['seqoK'])
     seqoV_2 = np.array(trend['seqoV'])
-    EPOC_I, ACTION_I = (0, 1)
-    # print(seqoa_2.shape) # (2442, 2)
-    h0, = ax2.plot(τa, seqoa_2[:,ACTION_I],'r', label='A')
-    h0A=h0
-    h0K, = ax2.plot(τa, seqoK_2[:,ACTION_I],'g', label='K')
-    h0V, = ax2.plot(τa, seqoV_2[:,ACTION_I],'m', label='V')
+    I_EPOC, I_ACTION, I_K, I_V = (0,1,2,3)
+    τa = seqoA_2[:,I_EPOC] * Dτ
+    h0A, = ax2.plot(τa, seqoA_2[:,I_ACTION],'r', label='A')
+    h0K, = ax2.plot(τa, seqoA_2[:,I_K],'g', label='K')
+    h0V, = ax2.plot(τa, seqoA_2[:,I_V],'c', label='V')
+    τa__ = τa_ * Dτ
+    ax2.plot(τa__, seqoK_2[:,1],'g:', label='K')
+    ax2.plot(τa__, seqoV_2[:,1],'c:', label='V')
     ax2b = ax2.twinx()
-    h1, = ax2b.plot(τa[1:], np.diff(seqoa_2[:,ACTION_I]), 'k.', markersize=0.2, label='ΔA')
-    h2, = ax2b.plot(τa[1:], np.diff(filter1(seqoa_2[:,ACTION_I], 0.01))/Dτ, 'b', label='dA')  # dx/dt
+    h1, = ax2b.plot(τa[1:], np.diff(seqoA_2[:,I_ACTION]), 'k.', markersize=0.2, label='ΔA')
+    h2, = ax2b.plot(τa[1:], np.diff(filter1(seqoA_2[:,I_ACTION], 0.01)), 'b', label='dA')  # dx/dt
 
     fig2_annot([ax2, ax2b], [[h0A,h0K,h0V],h1,h2])
 
@@ -328,7 +329,7 @@ def fig2_annot(aa, hhh):
     ax2b.set_ylim((-8.000, 0.2))
     ax2.set(xlabel='τ (epoc)');
     ax2.set_ylabel ('A = Action',  color='r')
-    #ax2.yaxis.label.set_color(h0.get_color())
+    #ax2.yaxis.label.set_color(h0A.get_color())
     ax2b.set_ylabel('ΔA', color='b') # ax2b.set(ylabel='ΔA')
     #ax2b.yaxis.label.set_color(h2.get_color())
     ax2.legend(handles=[h0A, h0K, h0V, h1, h2], loc='lower center')
