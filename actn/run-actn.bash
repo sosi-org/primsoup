@@ -2,6 +2,8 @@
 
 set -xu
 
+source ~/cs/implisolid/scripts/bash-utils.sh
+
 function chk_virtualenv(){
     # a solution based on `virutalenv`
 
@@ -84,8 +86,11 @@ function chk_venv(){
             --trusted-host pypi.org \
             matplotlib
 }
+
+MAKE_HAPPEN "./p3-for-me/bin/activate" || {
 # chk_virtualenv
 chk_venv
+}
 
 echo "Main script"
 source ./p3-for-me/bin/activate
