@@ -281,26 +281,26 @@ def overall_plot(bestTraj, hyper_traj, trend):
     ############
 
     # What is this figure showing?
-    # ta: not the real time, not the s: the learning time! τ
+    # τa: not the real time, not the s: the learning time! τ
     # x-axis = Abscissa = slow time: τ
     # # not physical time
     nτ = len(trend['seqoa'])
-    ta=np.arange(0.0,float(nτ))/float(nτ)
+    τa = np.arange(0.0,float(nτ))/float(nτ)
 
     Dτ=1.0 # not physical time, # 0.01
 
     fig, (ax1, ax2) = pl.subplots(1, 2)
-    fig2(ax2, ta, Dτ, trend['seqoa'])
+    fig2(ax2, τa, Dτ, trend['seqoa'])
     fig1(ax1,   bestTraj, hyper_traj)
 
-def fig2(ax2, ta, Dτ, seqoa):
+def fig2(ax2, τa, Dτ, seqoa):
     seqoa_2 = np.array(seqoa)
     EPOC_I, ACTION_I = (0, 1)
     # print(seqoa_2.shape) # (2442, 2)
-    h0, = ax2.plot(ta,seqoa_2[:,ACTION_I],'r', label='A')
+    h0, = ax2.plot(τa, seqoa_2[:,ACTION_I],'r', label='A')
     ax2b = ax2.twinx()
-    h1, = ax2b.plot(ta[1:],np.diff(seqoa_2[:,ACTION_I]), 'k.', markersize=0.2, label='ΔA')
-    h2, = ax2b.plot(ta[1:],np.diff(filter1(seqoa_2[:,ACTION_I], 0.01))/Dτ, 'b', label='dA')  # dx/dt
+    h1, = ax2b.plot(τa[1:], np.diff(seqoa_2[:,ACTION_I]), 'k.', markersize=0.2, label='ΔA')
+    h2, = ax2b.plot(τa[1:], np.diff(filter1(seqoa_2[:,ACTION_I], 0.01))/Dτ, 'b', label='dA')  # dx/dt
 
     fig2_annot([ax2, ax2b], [h0,h1,h2])
 
