@@ -296,7 +296,8 @@ def overall_plot(bestTraj, hyper_traj, trend):
     τa = np.arange(0.0,float(nτ))/float(nτ)
 
     # Dτ=1.0 # not physical time, # 0.01
-    Dτ=1.0/float(nτ)
+    #Dτ = 1.0/float(nτ)
+    Dτ = 1.0
 
     fig, (ax1, ax2) = pl.subplots(1, 2)
     fig2(ax2, τa, Dτ, trend)
@@ -308,12 +309,14 @@ def fig2(ax2, τa_, Dτ, trend):
     seqoV_2 = np.array(trend['seqoV'])
     I_EPOC, I_ACTION, I_K, I_V = (0,1,2,3)
     τa = seqoA_2[:,I_EPOC] * Dτ
-    h0A, = ax2.plot(τa, seqoA_2[:,I_ACTION],'r', label='A')
-    h0K, = ax2.plot(τa, seqoA_2[:,I_K],'g', label='K')
+    h0A, = ax2.plot(τa, seqoA_2[:,I_ACTION],'r', label='A=T-V')
+    h0K, = ax2.plot(τa, seqoA_2[:,I_K],'g', label='T')
     h0V, = ax2.plot(τa, seqoA_2[:,I_V],'c', label='V')
+    """
     τa__ = τa_ * Dτ
     ax2.plot(τa__, seqoK_2[:,1],'g:', label='K')
     ax2.plot(τa__, seqoV_2[:,1],'c:', label='V')
+    """
     ax2b = ax2.twinx()
     h1, = ax2b.plot(τa[1:], np.diff(seqoA_2[:,I_ACTION]), 'k.', markersize=0.2, label='ΔA')
     h2, = ax2b.plot(τa[1:], np.diff(filter1(seqoA_2[:,I_ACTION], 0.01)), 'b', label='dA')  # dx/dt
@@ -326,7 +329,7 @@ def fig2_annot(aa, hhh):
     [[h0A,h0K,h0V], h1,h2] = hhh
     ax2.set_xscale('log')
     #ax2.set(xlabel='τ (epoc)', ylabel='A'); ax2.legend() # ax2.set_title('τ,A') # Action
-    ax2b.set_ylim((-8.000, 0.2))
+    ax2b.set_ylim((-2.000, 0.2))
     ax2.set(xlabel='τ (epoc)');
     ax2.set_ylabel ('A = Action',  color='r')
     #ax2.yaxis.label.set_color(h0A.get_color())
