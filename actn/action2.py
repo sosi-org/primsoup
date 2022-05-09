@@ -46,7 +46,7 @@ def clamp(traj):
 
     # a clamp constrsaint is also equivalent to an implicit force
     mi = int(traj.xy.shape[1]/2)
-    traj.xy[:,mi] = (7.5, -1.0)
+    #traj.xy[:,mi] = (7.5, -1.0)
 
     # does not work properly
     if len(user_mouse_fixation) != 0:
@@ -207,6 +207,8 @@ def simulate():
     trend['seqoA'] = []  # for all accepted
     trend['seqoK'] = []  # for all accepted
     trend['seqoV'] = []  # for all accepted
+    trend['seqoFulTrajXY'] = []  # for all plotted only? no!  trajectories for # for all accepted
+    # aalternative: "tau"s for all "traj"
 
     PER_HOW_MANY = 500*2
 
@@ -250,6 +252,8 @@ def simulate():
         trend['seqoK'].append((i, newK))
         trend['seqoV'].append((i, newV))
 
+        trend['seqoFulTrajXY'].append(cand.xy)
+
         accepted_count += 1
         if accepted_count % PER_HOW_MANY == 0:
             print( 'Action,K,V=', action_new,newK,newV )
@@ -283,6 +287,48 @@ def live_fig_update(currentTraj, i):
     print( 'action:', currentTraj.get_action(), '  iteration', i)
     pl.show(block=False)
 
+def setLiveMouseHighlighter(pl, last_h, ax1, fig1, ta2_, hyper_traj_list):
+    #  last_h -> matplotlib.lines.Line2D
+    def find_nearest(array, value):
+      # by Demitri -- https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
+      idx = np.searchsorted(array, value, side="left")
+      if idx > 0 and (idx == len(array) or math.fabs(value - array[idx-1]) < math.fabs(value - array[idx])):
+          return idx-1 # array[idx-1]
+      else:
+          return idx # array[idx]
+    def mouse_move1(event):
+        if event.xdata is not None and event.ydata is not None:
+            print(last_h)
+            # h1: matplotlib.lines.Line2D
+
+            # idx = np.random.randint(10)
+
+            idx = find_nearest(ta2_, event.xdata)
+            print('nearest idx=', idx)
+            if False:
+                xyz = hyper_traj[idx]
+                
+                print('>>', xyz.shape) #?(1, 2, ntimesteps)  # an unnecessry dimention
+                last_h[0].set_data( xyz[0,X_AXIS,:], xyz[0,Y_AXIS,:] )
+                #last_h[0].set_data( np.random.rand(100,1), np.random.rand(100,1) )
+                # pl.show()
+                #fig1.canvas.draw()
+                #fig1.show()
+                #pl.pause(0.1)
+                pl.draw()
+                print('u')
+            if True:
+                print('ll', len(hyper_traj_list))
+                xy = hyper_traj_list[idx]
+                print('>.>', xy.shape)
+                xy[X_AXIS,:]
+                last_h[0]
+                last_h[0].set_data( xy[X_AXIS,:], xy[Y_AXIS,:] )
+                pl.draw()
+                print('u2')
+
+    pl.connect('motion_notify_event', mouse_move1)
+
 def overall_plot(bestTraj, hyper_traj, trend):
     ############
     # Plot overall indicators of trajectory of learning
@@ -300,8 +346,17 @@ def overall_plot(bestTraj, hyper_traj, trend):
     Dτ = 1.0
 
     fig, (ax1, ax2) = pl.subplots(1, 2)
-    fig2(ax2, τa, Dτ, trend)
+    (last_h, ax1) = \
     fig1(ax1,   bestTraj, hyper_traj)
+
+    ta2_ = \
+    fig2(ax2, τa, Dτ, trend)
+
+    #setLiveMouseHighlighter(pl, last_h, ax1, fig, ta2_, hyper_traj)
+    #setLiveMouseHighlighter(pl, last_h, ax1, fig, ta2_, np.array(trend['seqoA'])[:,0])
+    setLiveMouseHighlighter(pl, last_h, ax1, fig, ta2_, trend['seqoFulTrajXY'])
+    
+    # np.array(trend['seqoA'])[:,0]
 
 def fig2(ax2, τa_, Dτ, trend):
     seqoA_2 = np.array(trend['seqoA'])  # shape=(,4)
@@ -309,6 +364,12 @@ def fig2(ax2, τa_, Dτ, trend):
     seqoV_2 = np.array(trend['seqoV'])
     I_EPOC, I_ACTION, I_K, I_V = (0,1,2,3)
     τa = seqoA_2[:,I_EPOC] * Dτ
+    # τaix = np.arange(1,τa.shape[0]) * Dτ
+    τaix = τa # need the same values, but in a different indexing
+
+    #τa = seqoA_2[:,I_PLOT_IDX] * Dτ
+    #τaix = τa
+
     h0A, = ax2.plot(τa, seqoA_2[:,I_ACTION],'r', label='A=T-V')
     h0K, = ax2.plot(τa, seqoA_2[:,I_K],'g', label='T')
     h0V, = ax2.plot(τa, seqoA_2[:,I_V],'c', label='V')
@@ -327,7 +388,8 @@ def fig2(ax2, τa_, Dτ, trend):
     pl.yscale('log')
     h1, = ax2b.plot(τa[1:], -np.diff(seqoA_2[:,I_ACTION]), 'k.', markersize=0.2, label='ΔA')
     h2, = ax2b.plot(τa[1:], -np.diff(filter1(seqoA_2[:,I_ACTION], 0.01)), 'b', label='dA')  # dx/dt
-
+    # why repeated?
+    return τaix[1:]
 
 def fig2_annot(aa, hhh):
     [ax2, ax2b] = aa
@@ -356,13 +418,15 @@ def fig2_annot(aa, hhh):
 
         ##ax2.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(5))
         ax2b.spines.left.set_transform(matplotlib.transforms.Affine2D.identity().rotate(0.2))
-
+    if True:
+      pass
 
 def fig1(ax1, bestTraj, hyper_traj):
     # Plot certain streaks in the overall trajectory of learning
     xyz = np.concatenate(hyper_traj,axis=0)
     print(xyz.shape) #(:, 2, ntimesteps)
-    ax1.plot(bestTraj.xy[X_AXIS,:], bestTraj.xy[Y_AXIS,:], 'k')
+    last_h = \
+    ax1.plot(bestTraj.xy[X_AXIS,:], bestTraj.xy[Y_AXIS,:], 'k', linewidth=5)
     ax1.set(xlabel='x', ylabel='y') #ax1.set_title('X,Y')
     # pl.hold(true)
     for ii in [3,5]: # out of ntimesteps
@@ -370,6 +434,7 @@ def fig1(ax1, bestTraj, hyper_traj):
         ax1.plot(xyz[-1,0,:], xyz[-1,1,:], 'b-', linewidth=0.4)
         ax1.plot(xyz[:,0,ii], xyz[:,1,ii], 'r.--')
         ax1.set(xlabel='x', ylabel='y') #pl.gca().set
+    return (last_h, ax1)
 
 bestTraj, hyper_traj, trend  = simulate()
 overall_plot(bestTraj, hyper_traj, trend)
