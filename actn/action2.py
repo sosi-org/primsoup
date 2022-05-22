@@ -209,7 +209,7 @@ def init_trends():
         # aalternative: "tau"s for all "traj"
         return trend
 
-def register_trend(trend, i, action_new, newK, newV, cand):
+def register_trend(trend, i, cand, action_new, newK, newV):
         ''' called for each single accepted candidate '''
         trend['seqoA'].append((i, action_new, newK, newV))
         trend['seqoK'].append((i, newK))
@@ -260,7 +260,7 @@ def simulate():
         currentTraj = cand
         #cA, cK, cV = currentTraj.get_action()
 
-        register_trend(trend, i, action_new, newK, newV, cand)
+        register_trend(trend, i, cand, action_new, newK, newV)
 
         accepted_count += 1
         if accepted_count % PER_HOW_MANY == 0:
