@@ -293,46 +293,48 @@ def setLiveMouseHighlighter(pl, last_h, ax1, fig1, τa, hyper_traj_list):
     # The closure contains: `last_h`, `τai`, etc.  last_h -> matplotlib.lines.Line2D
 
     def find_nearest(array, value):
-      '''
-        array[return] ~= value
-      '''
-      # by Demitri -- https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
-      idx = np.searchsorted(array, value, side="left")
-      print()
-      if idx > 0 and \
-          (
-            idx == len(array) or
-            math.fabs(value - array[idx-1]) < math.fabs(value - array[idx])
-          ):
-          return idx-1 # array[idx-1]
-      else:
-          return idx # array[idx]
+        '''
+          array[return] ~= value
+        '''
+        # by Demitri -- https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
+        idx = np.searchsorted(array, value, side="left")
+        print()
+        if idx > 0 and \
+            (
+              idx == len(array) or
+              math.fabs(value - array[idx-1]) < math.fabs(value - array[idx])
+            ):
+            return idx-1 # array[idx-1]
+        else:
+            return idx # array[idx]
 
     def mouse_move1(event):
         if event.xdata is not None and event.ydata is not None:
             '''
             implicit arguments:
-                last_h: defined in closure set by setLiveMouseHighlighter()
-                    wrong: τa is used for plotting last_h ? no.
-                    It has nothing to do with that.
-                    last_h is more about output.
+                last_h
+                τa
 
-                τa It is used in trends plot
+            last_h: defined in closure set by setLiveMouseHighlighter()
+                wrong: τa is used for plotting last_h ? no.
+                It has nothing to do with that.
+                last_h is more about output.
 
+            τa: It is used in trends plot
+            # wonrg: τai: index in the number of accepted
+            τai: [index: number of accepted], value: iteration index
+            τa: [index= number of accepted], value= iteration index * Dτ = the (float) x-value used for plotting
 
-                # wonrg: τai: index in the number of accepted
-                τai: [index: number of accepted], value: iteration index
-                τa: [index= number of accepted], value= iteration index * Dτ = the (float) x-value used for plotting
-
-                "Has the same index with":
-                    hyper_traj_list[A]
-                    τa[A]
+            "Has the same index with":
+                hyper_traj_list[A]
+                τa[A]
             '''
 
             # idx = index (among) the number of accepted
             #  τa[idx] ~= event.xdata
             idx = find_nearest(τa, event.xdata)
-            print('nearest accpted_idx=', idx, 'x\'=iteration=', τa[idx], 'delta=x-x\'=', event.xdata-τa[idx])
+            print('nearest accpted_idx=', idx, 'x_=iteration=', τa[idx], 'delta=x-x_=', event.xdata-τa[idx])
+
             if False:
                 xyz = hyper_traj[idx] # (1, 2, ntimesteps)
                 xy = xyz[0] # first dimension is always 1, an unnecessry dimension
