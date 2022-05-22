@@ -260,14 +260,6 @@ def simulate():
 
     return currentTraj, hyper_traj, trend
 
-def filter1(a, alpha):
-    a = np.array(a); assert len(a.shape) == 1
-    b = a.copy()
-    slowa = a[0]
-    for i in range(1, b.shape[0]):
-        b[i] = slowa = slowa * (1.0-alpha) + a[i] * (alpha)
-    return b
-
 
 fig_live = pl.figure()
 fig_live.gca().set_aspect('equal')
@@ -275,13 +267,13 @@ def live_fig_update(currentTraj, i):
     handle, = pl.plot(currentTraj.xy[X_AXIS,:], currentTraj.xy[Y_AXIS,:], 'b') #, 'color',(0.3,0.3,0.3) )
     handle.set_linewidth(0.2)
 
-    def mouse_move(event):
+    def mouse_move0(event):
         # currentTraj.xy[:,-1]
         # print(event)
         if event.xdata is not None and event.ydata is not None:
             user_mouse_fixation[:] = [event.xdata, event.ydata]
 
-    pl.connect('motion_notify_event', mouse_move)
+    pl.connect('motion_notify_event', mouse_move0)
     #pl.draw()
     pl.pause(0.001)
     print( 'action:', currentTraj.get_action(), '  iteration', i)
@@ -357,6 +349,16 @@ def overall_plot(bestTraj, hyper_traj, trend):
     setLiveMouseHighlighter(pl, last_h, ax1, fig, ta2_, trend['seqoFulTrajXY'])
     
     # np.array(trend['seqoA'])[:,0]
+
+def filter1(a, alpha):
+    ''' Used for plotting only
+    '''
+    a = np.array(a); assert len(a.shape) == 1
+    b = a.copy()
+    slowa = a[0]
+    for i in range(1, b.shape[0]):
+        b[i] = slowa = slowa * (1.0-alpha) + a[i] * (alpha)
+    return b
 
 def fig2(ax2, τa_, Dτ, trend):
     seqoA_2 = np.array(trend['seqoA'])  # shape=(,4)
