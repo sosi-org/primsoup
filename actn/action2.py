@@ -288,9 +288,9 @@ def live_fig_update(currentTraj, i):
     print( 'action:', currentTraj.get_action(), '  iteration', i)
     pl.show(block=False)
 
-def setLiveMouseHighlighter(pl, last_h, ax1, fig1, ta2_, hyper_traj_list):
+def setLiveMouseHighlighter(pl, last_h, ax1, fig1, τai, hyper_traj_list):
     #  sets the closure, for subsequent calls to `mouse_move1`
-    # The closure contains: `last_h`, `ta2_`, etc.  last_h -> matplotlib.lines.Line2D
+    # The closure contains: `last_h`, `τai`, etc.  last_h -> matplotlib.lines.Line2D
 
     def find_nearest(array, value):
       # by Demitri -- https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
@@ -305,11 +305,11 @@ def setLiveMouseHighlighter(pl, last_h, ax1, fig1, ta2_, hyper_traj_list):
             '''
             implicit arguments:
                 last_h: defined in closure set by setLiveMouseHighlighter()
-                ta2_: index in the number of accepted
+                τai: index in the number of accepted
             '''
             #ta2_ = τaix[1:] (was)
             #ta2_ = τaix
-            idx = find_nearest(ta2_[1:], event.xdata)
+            idx = find_nearest(τai[1:], event.xdata)
             print('nearest idx=', idx)
             if False:
                 xyz = hyper_traj[idx] # (1, 2, ntimesteps)
@@ -348,12 +348,12 @@ def overall_plot(bestTraj, hyper_traj, trend):
     (last_h, ax1) = \
     fig1(ax1,   bestTraj, hyper_traj)
 
-    ta2_ = \
+    τai = \
     fig2(ax2, τa, Dτ, trend)
 
-    #setLiveMouseHighlighter(pl, last_h, ax1, fig, ta2_, hyper_traj)
-    #setLiveMouseHighlighter(pl, last_h, ax1, fig, ta2_, np.array(trend['seqoA'])[:,0])
-    setLiveMouseHighlighter(pl, last_h, ax1, fig, ta2_, trend['seqoFulTrajXY'])
+    #setLiveMouseHighlighter(pl, last_h, ax1, fig, τai, hyper_traj)
+    #setLiveMouseHighlighter(pl, last_h, ax1, fig, τai, np.array(trend['seqoA'])[:,0])
+    setLiveMouseHighlighter(pl, last_h, ax1, fig, τai, trend['seqoFulTrajXY'])
     
     # np.array(trend['seqoA'])[:,0]
 
@@ -367,23 +367,25 @@ def filter1(a, alpha):
         b[i] = slowa = slowa * (1.0-alpha) + a[i] * (alpha)
     return b
 
-def fig2(ax2, τa_, Dτ, trend):
+def fig2(ax2, τai, Dτ, trend):
     seqoA_2 = np.array(trend['seqoA'])  # shape=(,4)
     seqoK_2 = np.array(trend['seqoK'])
     seqoV_2 = np.array(trend['seqoV'])
     '''
       indices:
-        i: every iteration
+        i: every iteration = EPOC = τ
         a: every accepted,
         every PER_HOW_MANY iterations,
         every PER_HOW_MANY accepted
 
       # I_EPOC was practically: a: every accepted
+      τai: index: [every accepted] value: every iteration
     '''
     I_EPOC, I_ACTION, I_K, I_V = (0,1,2,3)
     τa = seqoA_2[:,I_EPOC] * Dτ
     # τaix = np.arange(1,τa.shape[0]) * Dτ
-    τaix = seqoA_2[:,I_EPOC] # need the same values as τa, but as index
+    # τaix -> τai
+    τai = seqoA_2[:,I_EPOC] # need the same values as τa, but as index
 
     #τa = seqoA_2[:,I_PLOT_IDX] * Dτ
     #τaix = τa
@@ -407,7 +409,7 @@ def fig2(ax2, τa_, Dτ, trend):
     h1, = ax2b.plot(τa[1:], -np.diff(seqoA_2[:,I_ACTION]), 'k.', markersize=0.2, label='ΔA')
     h2, = ax2b.plot(τa[1:], -np.diff(filter1(seqoA_2[:,I_ACTION], 0.01)), 'b', label='dA')  # dx/dt
     # why repeated?
-    return τaix
+    return τai
 
 def fig2_annot(aa, hhh):
     [ax2, ax2b] = aa
@@ -416,7 +418,7 @@ def fig2_annot(aa, hhh):
     #ax2.set(xlabel='τ (epoc)', ylabel='A'); ax2.legend() # ax2.set_title('τ,A') # Action
     #ax2b.set_ylim((-2.000, 0.2))
     ax2b.set_yscale('symlog')
-    ax2.set(xlabel='τ (epoc)');
+    ax2.set(xlabel='τ (epoc)')
     ax2.set_ylabel ('A = Action',  color='r')
     #ax2.yaxis.label.set_color(h0A.get_color())
     ax2b.set_ylabel('ΔA', color='b') # ax2b.set(ylabel='ΔA')
