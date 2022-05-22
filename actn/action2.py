@@ -202,21 +202,21 @@ def mutate(old_traj, actr):
 #    return
 
 def init_trends():
-        trend = { }
-        trend['seqoA'] = []  # for all accepted
-        trend['seqoK'] = []  # for all accepted
-        trend['seqoV'] = []  # for all accepted
-        trend['seqoFulTrajXY'] = []  # for all plotted only? no!  trajectories for # for all accepted
-        # aalternative: "tau"s for all "traj"
-        return trend
+    trend = { }
+    trend['seqoA'] = []  # for all accepted
+    trend['seqoK'] = []  # for all accepted
+    trend['seqoV'] = []  # for all accepted
+    trend['seqoFulTrajXY'] = []  # for all plotted only? no!  trajectories for # for all accepted
+    # aalternative: "tau"s for all "traj"
+    return trend
 
 def register_trend(trend, i, cand, action_new, newK, newV):
-        ''' called for each single accepted candidate '''
-        trend['seqoA'].append((i, action_new, newK, newV))
-        trend['seqoK'].append((i, newK))
-        trend['seqoV'].append((i, newV))
+    ''' called for each single accepted candidate '''
+    trend['seqoA'].append((i, action_new, newK, newV))
+    trend['seqoK'].append((i, newK))
+    trend['seqoV'].append((i, newV))
 
-        trend['seqoFulTrajXY'].append(cand.xy)
+    trend['seqoFulTrajXY'].append(cand.xy)
 
 def simulate():
     # hyper/meta trajectory
@@ -307,7 +307,9 @@ def setLiveMouseHighlighter(pl, last_h, ax1, fig1, ta2_, hyper_traj_list):
                 last_h: defined in closure set by setLiveMouseHighlighter()
                 ta2_: index in the number of accepted
             '''
-            idx = find_nearest(ta2_, event.xdata)
+            #ta2_ = τaix[1:] (was)
+            #ta2_ = τaix
+            idx = find_nearest(ta2_[1:], event.xdata)
             print('nearest idx=', idx)
             if False:
                 xyz = hyper_traj[idx] # (1, 2, ntimesteps)
@@ -369,10 +371,19 @@ def fig2(ax2, τa_, Dτ, trend):
     seqoA_2 = np.array(trend['seqoA'])  # shape=(,4)
     seqoK_2 = np.array(trend['seqoK'])
     seqoV_2 = np.array(trend['seqoV'])
+    '''
+      indices:
+        i: every iteration
+        a: every accepted,
+        every PER_HOW_MANY iterations,
+        every PER_HOW_MANY accepted
+
+      # I_EPOC was practically: a: every accepted
+    '''
     I_EPOC, I_ACTION, I_K, I_V = (0,1,2,3)
     τa = seqoA_2[:,I_EPOC] * Dτ
     # τaix = np.arange(1,τa.shape[0]) * Dτ
-    τaix = τa # need the same values, but in a different indexing
+    τaix = seqoA_2[:,I_EPOC] # need the same values as τa, but as index
 
     #τa = seqoA_2[:,I_PLOT_IDX] * Dτ
     #τaix = τa
@@ -396,7 +407,7 @@ def fig2(ax2, τa_, Dτ, trend):
     h1, = ax2b.plot(τa[1:], -np.diff(seqoA_2[:,I_ACTION]), 'k.', markersize=0.2, label='ΔA')
     h2, = ax2b.plot(τa[1:], -np.diff(filter1(seqoA_2[:,I_ACTION], 0.01)), 'b', label='dA')  # dx/dt
     # why repeated?
-    return τaix[1:]
+    return τaix
 
 def fig2_annot(aa, hhh):
     [ax2, ax2b] = aa
