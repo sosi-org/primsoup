@@ -76,6 +76,7 @@ class Trajectory:
     def __init__(self, trajc=None, initial_path_xy=None):
         if trajc is None:
             self.xy = initial_path_xy.copy()
+            # (2 x N)
             self.m = 1.0 * _KG
             self.dt = target_t_sec / float(ntimesteps)
             """ Even $dt$ does not have to be uniform.
@@ -288,7 +289,9 @@ def live_fig_update(currentTraj, i):
     pl.show(block=False)
 
 def setLiveMouseHighlighter(pl, last_h, ax1, fig1, ta2_, hyper_traj_list):
-    #  last_h -> matplotlib.lines.Line2D
+    #  sets the closure, for subsequent calls to `mouse_move1`
+    # The closure contains: `last_h`, `ta2_`, etc.  last_h -> matplotlib.lines.Line2D
+
     def find_nearest(array, value):
       # by Demitri -- https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
       idx = np.searchsorted(array, value, side="left")
@@ -296,36 +299,30 @@ def setLiveMouseHighlighter(pl, last_h, ax1, fig1, ta2_, hyper_traj_list):
           return idx-1 # array[idx-1]
       else:
           return idx # array[idx]
+
     def mouse_move1(event):
         if event.xdata is not None and event.ydata is not None:
-            print(last_h)
-            # h1: matplotlib.lines.Line2D
-
-            # idx = np.random.randint(10)
-
+            '''
+            implicit arguments:
+                last_h: defined in closure set by setLiveMouseHighlighter()
+                ta2_: index in the number of accepted
+            '''
             idx = find_nearest(ta2_, event.xdata)
             print('nearest idx=', idx)
             if False:
-                xyz = hyper_traj[idx]
-                
-                print('>>', xyz.shape) #?(1, 2, ntimesteps)  # an unnecessry dimention
-                last_h[0].set_data( xyz[0,X_AXIS,:], xyz[0,Y_AXIS,:] )
-                #last_h[0].set_data( np.random.rand(100,1), np.random.rand(100,1) )
-                # pl.show()
+                xyz = hyper_traj[idx] # (1, 2, ntimesteps)
+                xy = xyz[0] # first dimension is always 1, an unnecessry dimension
+                last_h[0].set_data( xy[X_AXIS,:], xy[Y_AXIS,:] )
                 #fig1.canvas.draw()
                 #fig1.show()
                 #pl.pause(0.1)
                 pl.draw()
-                print('u')
             if True:
-                print('ll', len(hyper_traj_list))
+                #print('ll', len(hyper_traj_list)) # len()=20701 = number of accepted
                 xy = hyper_traj_list[idx]
-                print('>.>', xy.shape)
-                xy[X_AXIS,:]
-                last_h[0]
+                print('>.>', xy.shape) # (2, ntimesteps)
                 last_h[0].set_data( xy[X_AXIS,:], xy[Y_AXIS,:] )
                 pl.draw()
-                print('u2')
 
     pl.connect('motion_notify_event', mouse_move1)
 
