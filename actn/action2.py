@@ -200,15 +200,27 @@ def mutate(old_traj, actr):
 #def accept_mutation(cand, old_traj):
 #    return
 
+def init_trends():
+        trend = { }
+        trend['seqoA'] = []  # for all accepted
+        trend['seqoK'] = []  # for all accepted
+        trend['seqoV'] = []  # for all accepted
+        trend['seqoFulTrajXY'] = []  # for all plotted only? no!  trajectories for # for all accepted
+        # aalternative: "tau"s for all "traj"
+        return trend
+
+def register_trend(trend, i, action_new, newK, newV, cand):
+        ''' called for each single accepted candidate '''
+        trend['seqoA'].append((i, action_new, newK, newV))
+        trend['seqoK'].append((i, newK))
+        trend['seqoV'].append((i, newV))
+
+        trend['seqoFulTrajXY'].append(cand.xy)
+
 def simulate():
     # hyper/meta trajectory
     hyper_traj = []  # less frequent
-    trend = { }
-    trend['seqoA'] = []  # for all accepted
-    trend['seqoK'] = []  # for all accepted
-    trend['seqoV'] = []  # for all accepted
-    trend['seqoFulTrajXY'] = []  # for all plotted only? no!  trajectories for # for all accepted
-    # aalternative: "tau"s for all "traj"
+    trend = init_trends()
 
     PER_HOW_MANY = 500*2
 
@@ -248,11 +260,7 @@ def simulate():
         currentTraj = cand
         #cA, cK, cV = currentTraj.get_action()
 
-        trend['seqoA'].append((i, action_new, newK, newV))
-        trend['seqoK'].append((i, newK))
-        trend['seqoV'].append((i, newV))
-
-        trend['seqoFulTrajXY'].append(cand.xy)
+        register_trend(trend, i, action_new, newK, newV, cand)
 
         accepted_count += 1
         if accepted_count % PER_HOW_MANY == 0:
