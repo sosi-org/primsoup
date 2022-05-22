@@ -338,7 +338,7 @@ def overall_plot(bestTraj, hyper_traj, trend):
     # x-axis = Abscissa = slow time: τ
     # # not physical time
     nτ = len(trend['seqoA'])
-    τa = np.arange(0.0,float(nτ))/float(nτ)
+    #τa = np.arange(0.0,float(nτ))/float(nτ)
 
     # Dτ=1.0 # not physical time, # 0.01
     #Dτ = 1.0/float(nτ)
@@ -349,7 +349,7 @@ def overall_plot(bestTraj, hyper_traj, trend):
     fig1(ax1,   bestTraj, hyper_traj)
 
     τai = \
-    fig2(ax2, τa, Dτ, trend)
+    fig2(ax2, Dτ, trend)
 
     #setLiveMouseHighlighter(pl, last_h, ax1, fig, τai, hyper_traj)
     #setLiveMouseHighlighter(pl, last_h, ax1, fig, τai, np.array(trend['seqoA'])[:,0])
@@ -367,7 +367,7 @@ def filter1(a, alpha):
         b[i] = slowa = slowa * (1.0-alpha) + a[i] * (alpha)
     return b
 
-def fig2(ax2, τai, Dτ, trend):
+def fig2(ax2, Dτ, trend):
     seqoA_2 = np.array(trend['seqoA'])  # shape=(,4)
     seqoK_2 = np.array(trend['seqoK'])
     seqoV_2 = np.array(trend['seqoV'])
