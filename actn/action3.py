@@ -17,13 +17,20 @@ pip install numpy matplotlib scipy pint
 
 '''
 # Forked from commit d47b539063ed99c78719608f7d59382d629dcd6b from a Sun May 22 2022, 11:44:36 BST
+# th/research_spatial_motion_segmentation_classification_poc/dynamic_optic_flow/generate_oflow.py
+# simultaneuity with:
+#     * /Users/sohail/cs/scientific-code-private/quantum_physics/mahdaei-python/simple_harmonic_phasespace.py
+#     * /Users/sohail/cs/gilbook-overleaf/informata/content/cards/infoness.tex
 
 
 import numpy as np
 import math
 import matplotlib.pylab as pl
 #import matplotlib
+import pint
+from typing import NamedTuple
 
+# Basic units: Kilograms, Grams, centimeters
 _KG, _Gr = 1.0, 0.001
 _CM = 0.01
 
@@ -31,10 +38,62 @@ _CM = 0.01
 ntimesteps = 10*2
 # segments of trajectory (nsteps = nsegments of time), discritisation segments of timespace trajectory
 
+# States space definition (Hilbert, etc)
 (X_AXIS, Y_AXIS) = (0, 1)
 (XY_DIM, S_DIM) = (0, 1)
 # x(s), y(s), t(s)
 # s = (time)steps
+
+class PhysWorldParams(NamedTuple):
+    '''
+    Parameters for the experiment, design, configuration
+       # Universal constants (units) # extract separate
+       # Universal constantns
+       # Nature of experiment
+       # Fixed
+       # paramterised (initial speed, etc): parametrised: deleibraaately set to be modified / adjusted.
+       # trial (trial-as-time)
+
+    World object. Objective ( State space, etc)
+
+    Nothing about simulation her e(duration, timesteps, etc)
+
+    Create a hierarchy here. (each also type-ableL can be referred to extenrally, as a type).
+    '''
+    # SPECIAL_ONE = 0
+
+    g = np.array([0, -9.8])
+
+class SimulatorParams(NamedTuple):
+    """
+    "world slice" params. world-simulation (a slice of the world: time, deltaT)
+    (as opposed to "world": PhysWorldParams)
+    was: SimulParams
+    """
+    # duration
+    # delta-t
+    pass
+
+
+class ObserverParams(NamedTuple):
+    # was: VisionParams (camera, observer)
+    # is objective (unlike VisualisationParams )
+    # CAMERA_POSITION_CENTRE =  (0.0, 0.0, -3.0)
+    pass
+
+class VisualisationParams(NamedTuple):
+    # ALPHA=0.30
+    pass
+
+class AnimOutputParams(NamedTuple):
+    # old name: VideoParams
+    # gif, avi-making
+    pass
+
+class InteractiveAnimParams(NamedTuple):
+    #  inputs
+    # objective? provides objetive things, but as gui things.
+    pass
 
 
 user_mouse_fixation = []
@@ -44,6 +103,7 @@ user_mouse_fixation = []
 target_xy_meters = np.array([15.0, 1.0])
 target_t_sec = 0.1 *40 # 100 msec?!  Also corresponds to the index [-1] of clamp
 
+# Enforces the constraints related to the boundary conditions (endpoints of the trajectory)
 def clamp(traj):
     # clamp end points
     traj.xy[:,0] = (0.0, 0.0)
@@ -81,8 +141,8 @@ def clamp(traj):
     traj.xy = traj.xy * (1-alpha) + traj2.xy * alpha
 '''
 
-class World:
-    g = np.array([0, -9.8])
+World=PhysWorldParams()
+
 
 class Trajectory:
     def __init__(self, trajc=None, initial_path_xy=None):
