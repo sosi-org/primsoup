@@ -1,8 +1,16 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 '''
 actn: Simple Action Minimizer: Experiment 2
+
+How to run:
+eval "$(pyenv init -)"
+pyenv activate qm-mahdaei
+
+# once:
+...
+pyenv virtualenv 3.12.4 qm-mahdaei
+...
+pip install numpy matplotlib scipy pint
 
 '''
 # Forked from commit d47b539063ed99c78719608f7d59382d629dcd6b from a Sun May 22 2022, 11:44:36 BST
