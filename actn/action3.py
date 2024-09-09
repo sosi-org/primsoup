@@ -229,6 +229,7 @@ class Trajectory:
         return np.sum(mgh) * self.dt  # integral = ∫ (mgh) dt
 
     def get_kin(self):
+        # xdot
         v = np.diff(self.xy, axis=S_DIM) / self.dt
         mv2 = np.sum(0.5 * self.m * v * v, axis=XY_DIM)
         # Somehow needs to also take acceleration into account.
@@ -236,8 +237,60 @@ class Trajectory:
         return np.sum(mv2) * self.dt  # integral =  ∫ (0.5 mv^2) dt
 
     def get_action(self):
-        T,V = self.get_kin(), self.get_pot()
-        return T - V, T, V
+        # old: L1
+        # T,V = self.get_kin(), self.get_pot()
+
+        # new one: L2
+        # L(x,ẋ,t) = m/2 ẋẋ + b ( θ(t) - θ(T-t) ) x
+
+        # Note: we have an "s", but not Time ! no time.
+        # Lagrange-multiplies forces" (reaction, rigid surface, intracting)
+        # Largrange has already solved the time problem a long time ago
+
+        # diff along s
+        xdot = np.diff(self.xy, axis=S_DIM) / self.dt
+        # inner product
+        v2 = np.sum(xdot * xdot, axis=XY_DIM)
+
+        # print(self.xy.shape): (2, 20)
+        # (2, 20)  correspond to (but not euqal to) [XY_DIM, S_DIM)
+        # [X_AXIS, Y_AXIS ] times 20-steps
+
+        # theta_switch := ( θ(t) - θ(T-t) )
+        # note: It seems, in L, you better not have a time !
+        #   It would be not natural !
+        # theta_switch = ( θ(t) - θ(T-t) )
+        # theta_switch = self.xy[X_AXIS,:] - self.xy[X_AXIS,-1::-1]
+        x = self.xy[X_AXIS, :-1]
+        y = self.xy[Y_AXIS, :-1]
+        theta_switch = (x>0) * (x < 0.01) * 1.0
+        # exit(1)
+
+        b = 1.0
+
+        L = 0.5 * self.m * v2 + b * theta_switch * x
+
+        # T,V are just for plotting
+        T = 0.5 * self.m * v2
+        # hence: (?)  ( assume, virtually: T - V = L )
+        V = - b * theta_switch * x
+
+
+        print(L.shape)
+        print(T.shape)
+        print(V.shape)
+        assert len(L.shape) == 1
+        assert len(T.shape) == 1
+        assert len(V.shape) == 1
+
+
+        # integrate all:
+        L = np.sum(L) * self.dt  # integral =  ∫ (L) dt
+        T = np.sum(T) * self.dt  # integral =  ∫ (T) dt
+        V = np.sum(V) * self.dt  # integral =  ∫ (V) dt
+
+        # return T - V, T, V
+        return L, T, V
 
 def mutate(old_traj, actr):
     # Candidate trajectory
@@ -318,6 +371,7 @@ def simulate():
         action_new, newK, newV = cand.get_action()
         cA, cK, cV = currentTraj.get_action()
         da = action_new - cA
+        # assert scalar
         if da >= 0: # Got worse (increased). We want the least action
             continue
 
