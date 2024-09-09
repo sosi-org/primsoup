@@ -1,8 +1,11 @@
 
 '''
-actn: Simple Action Minimizer: Experiment 2
+actn: Simple Action Minimizer:
+  Experiment 3
+    new (experimental) Lagraingians
 
-How to run:
+
+# How to run:
 eval "$(pyenv init -)"
 pyenv activate qm-mahdaei
 
