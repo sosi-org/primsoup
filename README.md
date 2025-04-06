@@ -1,6 +1,6 @@
 # primsoup
 
-Small mini-projects. Primordial Soup
+Small scientific mini-projects. Primordial Soup
 
 ### actn
 * `actn`
